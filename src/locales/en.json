@@ -1,0 +1,23 @@
+{
+  "title.chat": "Chats",
+  "title.call": "Calls",
+  "title.friend": "Friends",
+  "title.profile": "Profiles",
+  "modal.addFriend": "Add friends",
+  "label.username": "User name",
+  "appBar.translate": "Translator",
+  "appBar.note": "Notes",
+  "appBar.todo": "To-do list",
+  "appBar.setting": "Settings",
+  "phone.required": "Phone number is required",
+  "phone.minLength": "Phone number is min 10 characters",
+  "phone.maxLength": "Phone number is max 11 characters",
+  "phone.pattern": "Phone number is invalid pattern",
+  "birthday.required": "Birthday is required",
+  "name.required": "User name is required",
+  "name.minLength": "User name is min 6 characters",
+  "name.maxLength": "User name is max 30 characters",
+  "email.required": "Email is required",
+  "email.pattern": "Email is invalid pattern",
+  "user.changeAvatar": "Change Profile Picture"
+}

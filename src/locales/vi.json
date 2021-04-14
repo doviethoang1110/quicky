@@ -1,0 +1,23 @@
+{
+  "title.chat": "Trò chuyện",
+  "title.call": "Gọi điện",
+  "title.friend": "Bạn bè",
+  "title.profile": "Trang cá nhân",
+  "modal.addFriend": "Thêm bạn bè",
+  "label.username": "Tên người dùng",
+  "appBar.translate": "Phiên dịch",
+  "appBar.note": "Ghi chú",
+  "appBar.todo": "Danh sách việc làm",
+  "appBar.setting": "Tùy chỉnh",
+  "phone.required": "Số điện thoại không được rỗng",
+  "phone.minLength": "Số điện thoại tối thiểu 10 ký tự",
+  "phone.maxLength": "Số điện thoại tối đa 11 ký tự",
+  "phone.pattern": "Số điện thoại không đúng định dạng",
+  "birthday.required": "Ngày sinh là bắt buộc",
+  "name.required": "Tên là bắt buộc",
+  "name.minLength": "Tên tối thiểu 6 ký tự",
+  "name.maxLength": "Tên tối đa 30 ký tự",
+  "email.required": "Email là bắt buộc",
+  "email.pattern": "Email không đúng định dạng",
+  "user.changeAvatar": "Thay ảnh đại diện"
+}
