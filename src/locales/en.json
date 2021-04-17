@@ -19,5 +19,15 @@
   "name.maxLength": "User name is max 30 characters",
   "email.required": "Email is required",
   "email.pattern": "Email is invalid pattern",
-  "user.changeAvatar": "Change Profile Picture"
+  "user.changeAvatar": "Change Profile Picture",
+  "title.required": "Title is required",
+  "title.minLength": "Title is min 10 characters",
+  "title.maxLength": "Title is max 50 characters",
+  "details.max": "Details is max 300 characters",
+  "date.required": "Date is required",
+  "tag.0": "All tags",
+  "tag.1": "Personal",
+  "tag.2": "Important",
+  "tag.3": "Work",
+  "tag.4": "Favorite"
 }

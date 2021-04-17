@@ -3,6 +3,7 @@ import {withTranslation} from "react-i18next";
 import axiosService from "../../utils/axiosService";
 import {compose} from "redux";
 import {connect} from "react-redux";
+import {showToast} from "../../plugins/sweetAlert";
 
 const ChangePasswordForm = ({user}) => {
 
@@ -25,16 +26,16 @@ const ChangePasswordForm = ({user}) => {
             const response = await axiosService(`users/change-password/${user.id}`, "PATCH", pass);
             if (!response.data.success) {
                 const message = Object.values(response.data.errors)[0];
-                // showToast({show: true, message, title: response.data.message});
+                showToast('error', message);
             } else {
-                // showToast({show: true, message: response.data.result.message, title: response.data.message});
+                showToast('success', response.data.message);
                 document.getElementById("password").value = "";
                 document.getElementById("new-password").value = "";
                 document.getElementById("repeat-password").value = "";
             }
         } catch (e) {
             console.log('error change password', e)
-            // showToast({show: true, message: e.message, title: "Error"})
+            showToast('error', e.message);
         }
     }
 

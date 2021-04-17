@@ -21,6 +21,7 @@ export const FACEBOOK_LOGIN = "FACEBOOK_LOGIN";
 export const USER_UPDATE = "USER_UPDATE";
 export const USER_UPDATE_SUCCESS = "USER_UPDATE_SUCCESS";
 export const USER_UPDATE_FAILURE = "USER_UPDATE_FAILURE";
+export const USER_CHANGE_AVATAR = "USER_CHANGE_AVATAR";
 
 export const OK = 200;
 export const CREATED = 201;

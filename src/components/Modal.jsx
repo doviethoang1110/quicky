@@ -2,6 +2,7 @@ import React from 'react';
 import AddFriends from "./modals/AddFriends";
 import {showModal} from "../actions/modal.action";
 import {connect} from "react-redux";
+import AddNote from "./modals/AddNote";
 
 const Modal = ({modal}) => {
     return (
@@ -474,47 +475,7 @@ const Modal = ({modal}) => {
                 </div>
             </div>
 
-            <div className="modal modal-lg-fullscreen fade" id="addNoteModal" tabIndex="-1" role="dialog"
-                 aria-labelledby="addNoteModalLabel" aria-hidden="true">
-                <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-dialog-zoom">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title" id="addNoteModalLabel">Add new note</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            <form>
-                                <div className="form-group">
-                                    <label htmlFor="addNoteName" className="col-form-label">Note title:</label>
-                                    <input type="text" className="form-control" id="addNoteName" value=""
-                                           placeholder="Add note title here"/>
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="addNoteDetails" className="col-form-label">Note details:</label>
-                                    <textarea className="form-control hide-scrollbar" id="addNoteDetails" rows="4"
-                                              placeholder="Add note descriptions"></textarea>
-                                </div>
-                                <div className="form-group">
-                                    <label className="col-form-label">Note tag:</label>
-                                    <select className="custom-select font-size-sm shadow-none">
-                                        <option selected>Personal</option>
-                                        <option value="1">Important</option>
-                                        <option value="2">Work</option>
-                                        <option value="3">Favourite</option>
-                                    </select>
-                                </div>
-
-                            </form>
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-light border" data-dismiss="modal">Close</button>
-                            <button type="button" className="btn btn-primary">Add task</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {modal.show && modal.name === 'addNote' && (<AddNote show={modal.show}/>)}
 
             <div className="modal modal-lg-fullscreen fade" id="taskModal" tabIndex="-1" role="dialog"
                  aria-labelledby="taskModalLabel" aria-hidden="true">

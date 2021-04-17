@@ -1,6 +1,14 @@
 import {call, put, takeEvery, delay} from "redux-saga/effects";
 import axiosService from "../utils/axiosService";
-import {FACEBOOK_LOGIN, RECORD_EXIST, USER_LOGIN, USER_LOGOUT, USER_REFRESH_TOKEN, USER_UPDATE} from "../constants";
+import {
+    FACEBOOK_LOGIN,
+    RECORD_EXIST,
+    USER_CHANGE_AVATAR,
+    USER_LOGIN,
+    USER_LOGOUT,
+    USER_REFRESH_TOKEN,
+    USER_UPDATE
+} from "../constants";
 import cookieService from "../utils/cookieService";
 import {hideLoading, showLoading} from "../actions/loading.action";
 import _ from 'lodash';
@@ -27,8 +35,8 @@ function* setToken({accessToken, refreshToken, user}) {
 const login = (body) => axiosService('auth/sign-in', 'POST', body);
 const authFacebook = (body) => axiosService('auth/facebook', 'POST', body);
 const getNewAccessToken = (body) => axiosService('users/get-new-token', 'POST', body);
-const editUser = (id, body) => axiosService(`users/${id}`, 'PUT', body)
-
+const editUser = (id, body) => axiosService(`users/${id}`, 'PUT', body);
+const editAvatarUser = (id, body) => axiosService(`users/change-avatar/${id}`, 'PATCH', body);
 
 function* loginRequest(action) {
     yield put(showLoading());
@@ -38,8 +46,7 @@ function* loginRequest(action) {
         if (!response.data.success) {
             showToast('error', response.data.message);
             yield put(hideLoading());
-        }
-        else {
+        } else {
             const {accessToken, refreshToken} = response.data.result;
             const {user} = yield decode(accessToken);
             socket.emit("SET_CLIENT_ID", user._id);
@@ -105,8 +112,7 @@ function* userUpdate(action) {
         if (!response.data.success) {
             showToast('error', response.data.message);
             yield put(hideLoading());
-        }
-        else {
+        } else {
             yield delay(500);
             yield put(actionUpdateUserSuccess(action.payload));
             localStorage.setItem("user", JSON.stringify(response.data.result));
@@ -119,12 +125,33 @@ function* userUpdate(action) {
     }
 }
 
+function* userChangeAvatar(action) {
+    yield put(showLoading());
+    try {
+        const response = yield call(editAvatarUser, action.payload.id, _.omit(action.payload, ['id']));
+        if (!response.data.success) {
+            showToast('error', response.data.message);
+            yield put(hideLoading());
+        } else {
+            yield delay(500);
+            yield put(actionUpdateUserSuccess(action.payload));
+            localStorage.setItem("user", JSON.stringify(response.data.result));
+            yield put(hideLoading());
+        }
+    } catch (e) {
+        console.log('error saga user change avatar', e);
+        yield put(actionUpdateUserFailure())
+        yield put(hideLoading());
+    }
+}
+
 function* userWatcher() {
     yield takeEvery(USER_REFRESH_TOKEN, refreshToken);
     yield takeEvery(USER_LOGIN, loginRequest);
     yield takeEvery(USER_LOGOUT, logoutRequest);
     yield takeEvery(FACEBOOK_LOGIN, facebookLogin);
     yield takeEvery(USER_UPDATE, userUpdate);
+    yield takeEvery(USER_CHANGE_AVATAR, userChangeAvatar)
 }
 
 export default userWatcher;

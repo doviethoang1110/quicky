@@ -1,13 +1,14 @@
 import React, {useState} from 'react';
-import {actionLogout} from "../../actions/user.action";
+import {actionChangeAvatarUser, actionLogout} from "../../actions/user.action";
 import {connect} from "react-redux";
 import moment from "moment";
 import {compose} from "redux";
 import {withTranslation} from "react-i18next";
 import {storage} from "../../plugins/firebase";
 import config from "../../config";
+import axiosService from "../../utils/axiosService";
 
-const ProfileAside = ({logout, user, t}) => {
+const ProfileAside = ({logout, user, t, updateUser}) => {
 
     const [submit, setSubmit] = useState(false);
     const [image, setImage] = useState(null);
@@ -43,11 +44,14 @@ const ProfileAside = ({logout, user, t}) => {
             storage.ref("images/media/avatar")
                 .child(image.name)
                 .getDownloadURL()
-                .then(url => {
-                    console.log(url)
-
-                    setSubmit(false);
-                    setUrl(url);
+                .then(async url => {
+                    try {
+                        updateUser({id: user.id, avatar: image.name})
+                        setSubmit(false);
+                        setUrl(url);
+                    } catch (e) {
+                        console.log('error update avatar', e)
+                    }
                 })
         });
     }
@@ -68,7 +72,7 @@ const ProfileAside = ({logout, user, t}) => {
                                         <div style={{position: 'relative'}} className="avatar avatar-lg mb-3">
                                             <img id="avatar-preview" className="avatar-img" src={
                                                 url ||
-                                                (user.avatar &&`${config.FIREBASE_TOP_LINK + user.avatar + config.FIREBASE_BOTTOM_LINK}`) ||
+                                                (user.avatar && user.avatar.startsWith("https") ? user.avatar : `${config.FIREBASE_TOP_LINK + user.avatar + config.FIREBASE_BOTTOM_LINK}`) ||
                                                 'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
                                             } alt=""/>
                                         </div>
@@ -260,6 +264,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
+        updateUser: (data) => dispatch(actionChangeAvatarUser(data)),
         logout: () => dispatch(actionLogout())
     }
 }

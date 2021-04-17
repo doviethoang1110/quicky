@@ -9,7 +9,7 @@ let config = {
     FIREBASE_MESSAGE_SENDER_ID: "854007587607",
     FIREBASE_ID: "1:854007587607:web:7f059c12abb1d2b3e78d52",
     FIREBASE_MEASUREMENT_ID: "G-T2LW5JPE7G",
-    FIREBASE_TOP_LINK: "https://firebasestorage.googleapis.com/v0/b/messenger-94814.appspot.com/o/images/media/avatar/",
+    FIREBASE_TOP_LINK: "https://firebasestorage.googleapis.com/v0/b/messenger-94814.appspot.com/o/images%2Fmedia%2Favatar%2F",
     FIREBASE_BOTTOM_LINK: "?alt=media&token=7396517c-e9e7-4919-807e-6cef74caf0ef"
 };
 

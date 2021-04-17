@@ -1,4 +1,6 @@
 {
+  "success": "successfully",
+  "failure": "failure",
   "title.chat": "Trò chuyện",
   "title.call": "Gọi điện",
   "title.friend": "Bạn bè",
@@ -19,5 +21,15 @@
   "name.maxLength": "Tên tối đa 30 ký tự",
   "email.required": "Email là bắt buộc",
   "email.pattern": "Email không đúng định dạng",
-  "user.changeAvatar": "Thay ảnh đại diện"
+  "user.changeAvatar": "Thay ảnh đại diện",
+  "title.required": "Tiêu đề là bắt buộc",
+  "title.minLength": "Tiêu đề ít nhất 10 ký tự",
+  "title.maxLength": "Tiêu đề nhiều nhất 50 ký tự",
+  "details.max": "Mô tả nhiều nhất 300 ký tự",
+  "date.required": "Ngày là bắt buộc",
+  "tag.0": "Tất cả",
+  "tag.1": "Cá nhân",
+  "tag.2": "Quan trọng",
+  "tag.3": "Công việc",
+  "tag.4": "Sở thích"
 }

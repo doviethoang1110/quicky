@@ -1,5 +1,5 @@
 import {
-    FACEBOOK_LOGIN,
+    FACEBOOK_LOGIN, USER_CHANGE_AVATAR,
     USER_LOGIN,
     USER_LOGIN_SUCCESS,
     USER_LOGOUT,
@@ -52,6 +52,13 @@ export const actionLogoutSuccess = () => {
 export const actionUpdateUser = (user) => {
     return {
         type: USER_UPDATE,
+        payload: user
+    }
+}
+
+export const actionChangeAvatarUser = (user) => {
+    return {
+        type: USER_CHANGE_AVATAR,
         payload: user
     }
 }
