@@ -11,11 +11,16 @@ import {Switch, Route } from "react-router-dom";
 import socket from "../utils/socket";
 import {connect} from "react-redux";
 import {SET_USER_ID} from "../constants";
+import Users from "../components/Users";
+import {showToast} from "../plugins/sweetAlert";
 
 const Messenger = ({user}) => {
 
     useEffect(() => {
         socket.emit(SET_USER_ID, user.id);
+        socket.on("FAILURE", (data) => {
+            showToast("error", data);
+        })
     }, []);
 
     return (
@@ -24,6 +29,7 @@ const Messenger = ({user}) => {
             <SideBar/>
             <main className="main main-visible">
                 <Switch>
+                    <Route path={'/users/:id'} component={Users} exact/>
                     <Route path={'/chats'} component={MessageContent} exact/>
                     <Route path={'/calls'} component={CallContent} exact/>
                     <Route path={'/friends'} component={FriendContent} exact/>

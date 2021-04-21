@@ -1,10 +1,11 @@
 import React, {useEffect} from 'react';
 import socket from "../utils/socket";
-import {RECEIVED_ADD_FRIEND_REQUEST} from "../constants";
+import {RECEIVED_ADD_FRIEND_REQUEST, REMOVE_ADD_FRIEND_REQUEST_SUCCESS} from "../constants";
 import {connect} from "react-redux";
 import {showModal} from "../actions/modal.action";
 import {withTranslation} from 'react-i18next';
 import {compose} from "redux";
+import {showToast} from "../plugins/sweetAlert";
 
 const style = {
     position: 'absolute',
@@ -18,9 +19,12 @@ const style = {
 const SideBarHeader = ({openAddFriendModal, title, t}) => {
 
     useEffect(() => {
-        socket.on(RECEIVED_ADD_FRIEND_REQUEST, (data) => {
-            console.log('nhận', data)
-        });
+        // socket.on(RECEIVED_ADD_FRIEND_REQUEST, (data) => {
+        //     showToast('success', `${data.name} send you an add friend request`);
+        // });
+        // socket.on(REMOVE_ADD_FRIEND_REQUEST_SUCCESS, data => {
+        //     showToast('success', `${data.name} reject your friend request`);
+        // })
     }, []);
 
     return (

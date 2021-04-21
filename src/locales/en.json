@@ -29,5 +29,8 @@
   "tag.1": "Personal",
   "tag.2": "Important",
   "tag.3": "Work",
-  "tag.4": "Favorite"
+  "tag.4": "Favorite",
+  "remove.request": "Remove request",
+  "accept.request": "Accept request",
+  "addFriend.request": "Add friend"
 }

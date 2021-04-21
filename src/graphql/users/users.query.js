@@ -13,3 +13,18 @@ export const FIND_USERS = gql`
         }
     }
 `;
+
+export const FIND_USERS_BY_ID = gql`
+    query findUsersById($id: Int!) {
+        getUsersById(id: $id) {
+            id
+            name
+            birthday
+            phone
+            avatar
+            email
+            userActionId
+            status
+        }
+    }
+`;
