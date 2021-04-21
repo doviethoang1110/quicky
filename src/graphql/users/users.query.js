@@ -28,3 +28,14 @@ export const FIND_USERS_BY_ID = gql`
         }
     }
 `;
+
+export const FIND_LIST_FRIENDS = gql`
+    query findListFriends($filter: String) {
+        findListFriends(filter: $filter) {
+            id
+            name
+            avatar
+            email
+        }
+    }
+`;

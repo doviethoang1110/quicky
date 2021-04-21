@@ -1,252 +1,73 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import SideBarHeader from "../SideBarHeader";
+import client from "../../plugins/apollo";
+import {} from "../../graphql/users/users.query";
+import {connect} from "react-redux";
+import {FIND_LIST_FRIENDS} from "../../graphql/users/users.query";
+import config from "../../config";
+import socket from "../../utils/socket";
+import {GET_PROFILE} from "../../constants";
 
-const FriendAside = (props) => {
+const FriendAside = ({user}) => {
+
+    const [users, setUsers] = useState([]);
+
+
+    useEffect(async () => {
+        const {data} = await client.query({
+            query: FIND_LIST_FRIENDS,
+            variables: {
+                filter: `{"id": "${user.id}"}`
+            }
+        });
+        setUsers([...data.findListFriends]);
+        if (data.findListFriends.length > 0) {
+            document.getElementById(`ele${data.findListFriends[0].id}`).classList.add("active");
+            socket.emit(GET_PROFILE, data.findListFriends[0].id);
+        }
+    }, []);
+
+    const showProfile = (e, id) => {
+        e.preventDefault();
+        for (let i = 0; i < document.getElementsByClassName("contacts-item").length; i++) {
+            document.getElementsByClassName("contacts-item")[i].classList.remove("active")
+        }
+        document.getElementById(`ele${id}`).classList.add("active");
+        socket.emit(GET_PROFILE, id);
+    }
+
     return (
         <div className="tab-pane active" id="friends-content">
             <div className="d-flex flex-column h-100">
                 <div className="hide-scrollbar" id="friendsList">
                     <SideBarHeader title="title.friend"/>
                     <ul className="contacts-list" id="friendsTab" data-friends-list="">
-                        <li>
-                            <small className="font-weight-medium text-uppercase text-muted">A</small>
-                        </li>
-                        <li className="contacts-item active">
-                            <a className="contacts-link" href="# ">
-                                <div className="avatar">
-                                    <img src="./../../assets/media/avatar/3.png" alt=""/>
-                                </div>
-                                <div className="contacts-content">
-                                    <div className="contacts-info">
-                                        <h6 className="chat-name text-truncate">Albert K. Johansen</h6>
+                        {users && users.length > 0 ? users.map((u, index) => (
+                            <li id={`ele${u.id}`} onClick={(e) => showProfile(e, u.id)} key={index} className="contacts-item">
+                                <a className="contacts-link" href="# ">
+                                    <div className="avatar">
+                                        <img src={
+                                            u.avatar && (u.avatar.startsWith("https") ? u.avatar : `${config.FIREBASE_TOP_LINK + u.avatar + config.FIREBASE_BOTTOM_LINK}`) ||
+                                            'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
+                                        } alt=""/>
                                     </div>
-                                    <div className="contacts-texts">
-
-                                        <svg className="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd"
-                                                  d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                                                  clipRule="evenodd"/>
-                                        </svg>
-                                        <p className="text-muted mb-0">San Fransisco, CA</p>
+                                    <div className="contacts-content">
+                                        <div className="contacts-info">
+                                            <h6 className="chat-name text-truncate">{u.name || ''}</h6>
+                                        </div>
+                                        <div className="contacts-texts">
+                                            <svg className="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd"
+                                                      d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                                                      clipRule="evenodd"/>
+                                            </svg>
+                                            <p className="text-muted mb-0">{u.email || ''}</p>
+                                        </div>
                                     </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li className="contacts-item">
-                            <a className="contacts-link" href="# ">
-                                <div className="avatar">
-                                    <img src="./../../assets/media/avatar/3.png" alt=""/>
-                                </div>
-                                <div className="contacts-content">
-                                    <div className="contacts-info">
-                                        <h6 className="chat-name text-truncate">Alice R. Botello</h6>
-                                    </div>
-                                    <div className="contacts-texts">
-
-                                        <svg className="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd"
-                                                  d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                                                  clipRule="evenodd"/>
-                                        </svg>
-
-                                        <p className="text-muted mb-0">Brentwood, NY</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
-                            <small className="font-weight-medium text-uppercase text-muted">b</small>
-                        </li>
-                        <li className="contacts-item">
-                            <a className="contacts-link" href="# ">
-                                <div className="avatar">
-                                    <img src="./../../assets/media/avatar/3.png" alt=""/>
-                                </div>
-                                <div className="contacts-content">
-                                    <div className="contacts-info">
-                                        <h6 className="chat-name text-truncate">Brittany K. Williams</h6>
-                                    </div>
-                                    <div className="contacts-texts">
-
-                                        <svg className="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd"
-                                                  d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                                                  clipRule="evenodd"/>
-                                        </svg>
-                                        <p className="text-muted mb-0">Scranton, PA</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
-                            <small className="font-weight-medium text-uppercase text-muted">C</small>
-                        </li>
-                        <li className="contacts-item">
-                            <a className="contacts-link" href="# ">
-                                <div className="avatar">
-                                    <img src="./../../assets/media/avatar/3.png" alt=""/>
-                                </div>
-                                <div className="contacts-content">
-                                    <div className="contacts-info">
-                                        <h6 className="chat-name text-truncate">Christopher Garcia</h6>
-                                    </div>
-                                    <div className="contacts-texts">
-
-                                        <svg className="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd"
-                                                  d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                                                  clipRule="evenodd"/>
-                                        </svg>
-                                        <p className="text-muted mb-0">Riverside, CA</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li className="contacts-item">
-                            <a className="contacts-link" href="# ">
-                                <div className="avatar">
-                                    <img src="./../../assets/media/avatar/3.png" alt=""/>
-                                </div>
-                                <div className="contacts-content">
-                                    <div className="contacts-info">
-                                        <h6 className="chat-name text-truncate">Casey Mcbride</h6>
-                                    </div>
-                                    <div className="contacts-texts">
-
-                                        <svg className="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd"
-                                                  d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                                                  clipRule="evenodd"/>
-                                        </svg>
-
-                                        <p className="text-muted mb-0">Zephyr, NC</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
-                            <small className="font-weight-medium text-uppercase text-muted">G</small>
-                        </li>
-                        <li className="contacts-item">
-                            <a className="contacts-link" href="# ">
-                                <div className="avatar">
-                                    <img src="./../../assets/media/avatar/3.png" alt=""/>
-                                </div>
-                                <div className="contacts-content">
-                                    <div className="contacts-info">
-                                        <h6 className="chat-name text-truncate">Gemma Mendez</h6>
-                                    </div>
-                                    <div className="contacts-texts">
-
-                                        <svg className="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd"
-                                                  d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                                                  clipRule="evenodd"/>
-                                        </svg>
-
-                                        <p className="text-muted mb-0">Frederick, MD</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
-                            <small className="font-weight-medium text-uppercase text-muted">k</small>
-                        </li>
-                        <li className="contacts-item">
-                            <a className="contacts-link" href="# ">
-                                <div className="avatar">
-                                    <img src="./../../assets/media/avatar/3.png" alt=""/>
-                                </div>
-                                <div className="contacts-content">
-                                    <div className="contacts-info">
-                                        <h6 className="chat-name text-truncate">Katelyn Valdez</h6>
-                                    </div>
-                                    <div className="contacts-texts">
-
-                                        <svg className="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd"
-                                                  d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                                                  clipRule="evenodd"/>
-                                        </svg>
-
-                                        <p className="text-muted mb-0">Jackson, TN</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li className="contacts-item">
-                            <a className="contacts-link" href="# ">
-                                <div className="avatar">
-                                    <img src="./../../assets/media/avatar/3.png" alt=""/>
-                                </div>
-                                <div className="contacts-content">
-                                    <div className="contacts-info">
-                                        <h6 className="chat-name text-truncate">Katherine Schneider</h6>
-                                    </div>
-                                    <div className="contacts-texts">
-
-                                        <svg className="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd"
-                                                  d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                                                  clipRule="evenodd"/>
-                                        </svg>
-
-
-                                        <p className="text-muted mb-0">Saginaw, MI</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
-                            <small className="font-weight-medium text-uppercase text-muted">m</small>
-                        </li>
-                        <li className="contacts-item">
-                            <a className="contacts-link" href="# ">
-                                <div className="avatar">
-                                    <img src="./../../assets/media/avatar/3.png" alt=""/>
-                                </div>
-                                <div className="contacts-content">
-                                    <div className="contacts-info">
-                                        <h6 className="chat-name text-truncate">Maizie Edwards</h6>
-                                    </div>
-                                    <div className="contacts-texts">
-
-                                        <svg className="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd"
-                                                  d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                                                  clipRule="evenodd"/>
-                                        </svg>
-
-                                        <p className="text-muted mb-0">Greensboro, NC</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
-                            <small className="font-weight-medium text-uppercase text-muted">s</small>
-                        </li>
-                        <li className="contacts-item">
-                            <a className="contacts-link" href="# ">
-                                <div className="avatar">
-                                    <img src="./../../assets/media/avatar/3.png" alt=""/>
-                                </div>
-                                <div className="contacts-content">
-                                    <div className="contacts-info">
-                                        <h6 className="chat-name text-truncate">Susan K. Taylor</h6>
-                                    </div>
-                                    <div className="contacts-texts">
-
-                                        <svg className="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd"
-                                                  d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                                                  clipRule="evenodd"/>
-                                        </svg>
-                                        <p className="text-muted mb-0">Centerville, VA</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-
+                                </a>
+                            </li>
+                        )) : (<span className="text-primary">Chưa có bạn bè</span>)}
+                        <div id="last-child"></div>
                     </ul>
                 </div>
             </div>
@@ -254,4 +75,10 @@ const FriendAside = (props) => {
     );
 }
 
-export default FriendAside;
+const mapStateToProps = state => {
+    return {
+        user: state.userReducer
+    }
+}
+
+export default connect(mapStateToProps, null)(FriendAside);
