@@ -71,14 +71,14 @@ $(document).ready(function () {
     });
 
     // Create Group
-    $('#createGroup').modalSteps({
-        btnNextHtml: "Next",
-        btnLastStepHtml: "Finish",
-        disableNextButton: false,
-        completeCallback: function () {},
-        callbacks: {},
-        getTitleAndStep: function () {}
-    });
+    // $('#createGroup').modalSteps({
+    //     btnNextHtml: "Next",
+    //     btnLastStepHtml: "Finish",
+    //     disableNextButton: false,
+    //     completeCallback: function () {},
+    //     callbacks: {},
+    //     getTitleAndStep: function () {}
+    // });
 
     // File Input
     $(document).on('change', '.custom-file-input', function (event) {

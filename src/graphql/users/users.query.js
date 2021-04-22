@@ -30,12 +30,16 @@ export const FIND_USERS_BY_ID = gql`
 `;
 
 export const FIND_LIST_FRIENDS = gql`
-    query findListFriends($filter: String) {
-        findListFriends(filter: $filter) {
-            id
-            name
-            avatar
-            email
+    query findListFriends($filter: String, $page: Int, $limit: Int) {
+        findListFriends(filter: $filter, page: $page, limit: $limit) {
+            currentPage
+            totalPage
+            users {
+                id
+                name
+                email
+                avatar
+            }
         }
     }
 `;

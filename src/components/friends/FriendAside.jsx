@@ -11,19 +11,22 @@ import {GET_PROFILE} from "../../constants";
 const FriendAside = ({user}) => {
 
     const [users, setUsers] = useState([]);
-
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPage, setTotalPage] = useState(null);
 
     useEffect(async () => {
         const {data} = await client.query({
             query: FIND_LIST_FRIENDS,
             variables: {
-                filter: `{"id": "${user.id}"}`
+                filter: `{"id": "${user.id}"}`,
+                page: currentPage,
+                limit: 5
             }
         });
-        setUsers([...data.findListFriends]);
-        if (data.findListFriends.length > 0) {
-            document.getElementById(`ele${data.findListFriends[0].id}`).classList.add("active");
-            socket.emit(GET_PROFILE, data.findListFriends[0].id);
+        setUsers([...data.findListFriends.users || []]);
+        if (data.findListFriends?.users.length > 0) {
+            document.getElementById(`ele${data.findListFriends.users[0].id}`).classList.add("active");
+            socket.emit(GET_PROFILE, data.findListFriends.users[0].id);
         }
     }, []);
 
@@ -36,12 +39,16 @@ const FriendAside = ({user}) => {
         socket.emit(GET_PROFILE, id);
     }
 
+    const handleScroll = () => {
+        console.log('ok')
+    }
+
     return (
         <div className="tab-pane active" id="friends-content">
             <div className="d-flex flex-column h-100">
                 <div className="hide-scrollbar" id="friendsList">
                     <SideBarHeader title="title.friend"/>
-                    <ul className="contacts-list" id="friendsTab" data-friends-list="">
+                    <ul onScroll={handleScroll} className="contacts-list" id="friendsTab" data-friends-list="" style={{overflowY: 'auto', height: '500px'}}>
                         {users && users.length > 0 ? users.map((u, index) => (
                             <li id={`ele${u.id}`} onClick={(e) => showProfile(e, u.id)} key={index} className="contacts-item">
                                 <a className="contacts-link" href="# ">

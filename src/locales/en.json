@@ -4,6 +4,7 @@
   "title.friend": "Friends",
   "title.profile": "Profiles",
   "modal.addFriend": "Add friends",
+  "modal.createGroup": "Create group",
   "label.username": "User name",
   "appBar.translate": "Translator",
   "appBar.note": "Notes",
@@ -32,5 +33,9 @@
   "tag.4": "Favorite",
   "remove.request": "Remove request",
   "accept.request": "Accept request",
-  "addFriend.request": "Add friend"
+  "addFriend.request": "Add friend",
+  "groupName.required": "Group name is required",
+  "groupName.minLength": "Group name is min 10 characters",
+  "groupName.maxLength": "Group name is max 50 characters",
+  "participants.required": "Participants is min 2"
 }

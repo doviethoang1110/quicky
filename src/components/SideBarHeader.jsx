@@ -16,15 +16,10 @@ const style = {
     fontSize: '10px'
 };
 
-const SideBarHeader = ({openAddFriendModal, title, t}) => {
+const SideBarHeader = ({openCreateGroupModal, openAddFriendModal, title, t}) => {
 
     useEffect(() => {
-        // socket.on(RECEIVED_ADD_FRIEND_REQUEST, (data) => {
-        //     showToast('success', `${data.name} send you an add friend request`);
-        // });
-        // socket.on(REMOVE_ADD_FRIEND_REQUEST_SUCCESS, data => {
-        //     showToast('success', `${data.name} reject your friend request`);
-        // })
+
     }, []);
 
     return (
@@ -68,8 +63,9 @@ const SideBarHeader = ({openAddFriendModal, title, t}) => {
                                 <div className="dropdown-menu dropdown-menu-right">
                                     <a className="dropdown-item" href="# " role="button" data-toggle="modal"
                                        data-target="#startConversation">New Chat</a>
-                                    <a className="dropdown-item" href="# " role="button" data-toggle="modal"
-                                       data-target="#createGroup">Create Group</a>
+                                    <button type="button" className="dropdown-item" role="button"
+                                            onClick={(e) => openCreateGroupModal()}>{t('modal.createGroup')}
+                                    </button>
                                     <button type="button" className="dropdown-item" role="button"
                                             onClick={(e) => openAddFriendModal()}>{t('modal.addFriend')}
                                     </button>
@@ -118,7 +114,8 @@ const SideBarHeader = ({openAddFriendModal, title, t}) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        openAddFriendModal: () => dispatch(showModal({name: "addFriend", show: true}))
+        openAddFriendModal: () => dispatch(showModal({name: "addFriend", show: true})),
+        openCreateGroupModal: () => dispatch(showModal({name: 'createGroup', show: true}))
     }
 }
 

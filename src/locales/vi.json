@@ -6,6 +6,7 @@
   "title.friend": "Bạn bè",
   "title.profile": "Trang cá nhân",
   "modal.addFriend": "Thêm bạn bè",
+  "modal.createGroup": "Tạo nhóm",
   "label.username": "Tên người dùng",
   "appBar.translate": "Phiên dịch",
   "appBar.note": "Ghi chú",
@@ -34,5 +35,6 @@
   "tag.4": "Sở thích",
   "remove.request": "Từ chối lời mời",
   "accept.request": "Dồng ý kết bạn",
-  "addFriend.request": "Kết bạn"
+  "addFriend.request": "Kết bạn",
+  "participants.required": "Số người tham gia tối thiểu 2"
 }

@@ -20,7 +20,12 @@ const Messenger = ({user}) => {
         socket.emit(SET_USER_ID, user.id);
         socket.on("FAILURE", (data) => {
             showToast("error", data);
-        })
+        });
+        return () => {
+            socket.off("FAILURE", (data) => {
+                showToast("error", data);
+            });
+        }
     }, []);
 
     return (
