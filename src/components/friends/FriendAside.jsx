@@ -95,9 +95,12 @@ const FriendAside = ({user, t}) => {
                                 <div className="dropdown-menu">
                                     <a className="dropdown-item" data-chat-filter="" data-select="all-chats" href="# ">All
                                         Chats</a>
-                                    <a className="dropdown-item" data-chat-filter="" data-select="friends" href="# ">Friends</a>
-                                    <a className="dropdown-item" data-chat-filter="" data-select="groups" href="# ">Groups</a>
-                                    <a className="dropdown-item" data-chat-filter="" data-select="unread" href="# ">Unread</a>
+                                    <a className="dropdown-item" data-chat-filter="" data-select="friends"
+                                       href="# ">Friends</a>
+                                    <a className="dropdown-item" data-chat-filter="" data-select="groups"
+                                       href="# ">Groups</a>
+                                    <a className="dropdown-item" data-chat-filter="" data-select="unread"
+                                       href="# ">Unread</a>
                                     <a className="dropdown-item" data-chat-filter="" data-select="archived"
                                        href="# ">Archived</a>
                                 </div>
@@ -105,7 +108,8 @@ const FriendAside = ({user, t}) => {
                             <form className="form-inline">
                                 <div className="input-group">
                                     <input type="text" onChange={(e) => handleChange(e)} id="search"
-                                           className="form-control search border-right-0 transparent-bg pr-0" value={search}
+                                           className="form-control search border-right-0 transparent-bg pr-0"
+                                           value={search}
                                            placeholder="Search users"/>
                                     <div className="input-group-append">
                                         <div className="input-group-text transparent-bg border-left-0" role="button">
@@ -123,7 +127,7 @@ const FriendAside = ({user, t}) => {
                             style={{overflowY: 'auto', height: '580px'}}>
                             {users && users.length > 0 ? users.map((u, index) => (
                                 <li id={`ele${u.id}`} onClick={(e) => showProfile(e, u.id)} key={index}
-                                    className="contacts-item">
+                                    className={`contacts-item ${index === 0 ? 'active' : ''}`}>
                                     <a className="contacts-link" href="# ">
                                         <div className="avatar">
                                             <img src={

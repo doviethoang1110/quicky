@@ -93,7 +93,7 @@ const CreateGroup = ({hideCreateGroup, show, t, user}) => {
             const param = {
                 name: getValues().groupName,
                 image,
-                participants: participants.map(p => p.id),
+                participants: [...participants.map(p => p.id), user.id.toString()],
                 type: 'group',
                 creatorId: user.id.toString()
             };
