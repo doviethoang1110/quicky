@@ -16,13 +16,18 @@ const FriendContent = (props) => {
         avatar: null
     });
 
+    const handleSocket = data => {
+        setUserProfile({...data});
+    };
+
     useEffect(() => {
         const body = document.querySelector("body");
         body.classList.remove(`${body.classList[0]}`);
         body.classList.add("friends-tab-open");
-        socket.on(GET_PROFILE_SUCCESS, data => {
-            setUserProfile({...data});
-        });
+        socket.on(GET_PROFILE_SUCCESS, handleSocket);
+        return () => {
+            socket.off(GET_PROFILE_SUCCESS, handleSocket);
+        }
     }, []);
 
     return (
@@ -44,17 +49,21 @@ const FriendContent = (props) => {
                                         <div className="d-flex flex-column align-items-center">
                                             <h5 className="mb-1">{userProfile.name}</h5>
                                             <div className="d-flex mt-2">
-                                                <div className="btn btn-primary btn-icon rounded-circle text-light mx-2">
+                                                <div
+                                                    className="btn btn-primary btn-icon rounded-circle text-light mx-2">
                                                     <svg className="hw-24" fill="none" viewBox="0 0 24 24"
                                                          stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                                        <path strokeLinecap="round" strokeLinejoin="round"
+                                                              strokeWidth="2"
                                                               d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                                                     </svg>
                                                 </div>
-                                                <div className="btn btn-success btn-icon rounded-circle text-light mx-2">
+                                                <div
+                                                    className="btn btn-success btn-icon rounded-circle text-light mx-2">
                                                     <svg className="hw-24" fill="none" viewBox="0 0 24 24"
                                                          stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                                        <path strokeLinecap="round" strokeLinejoin="round"
+                                                              strokeWidth="2"
                                                               d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                                                     </svg>
                                                 </div>
@@ -66,7 +75,8 @@ const FriendContent = (props) => {
                                             <button className="btn btn-secondary btn-icon btn-minimal btn-sm text-muted"
                                                     type="button"
                                                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                <svg className="hw-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg className="hw-20" fill="none" viewBox="0 0 24 24"
+                                                     stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                           d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
                                                 </svg>
@@ -83,7 +93,8 @@ const FriendContent = (props) => {
                                         <button className="btn btn-secondary btn-icon btn-minimal btn-sm text-muted"
                                                 type="button"
                                                 data-close="">
-                                            <svg className="hw-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg className="hw-20" fill="none" viewBox="0 0 24 24"
+                                                 stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                       d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                                             </svg>

@@ -11,7 +11,7 @@ export const FIND_CONVERSATIONS = gql`
                 lastMessage {
                     message
                     type
-                    user {
+                    users {
                         name
                     }
                 }

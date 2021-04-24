@@ -38,5 +38,8 @@
   "groupName.minLength": "Group name is min 10 characters",
   "groupName.maxLength": "Group name is max 50 characters",
   "participants.required": "Participants is min 2",
-  "notfound": "Not found"
+  "notfound": "Not found",
+  "minuteAgo": "a minute ago",
+  "yesterday": "yesterday",
+  "justNow": "Just now"
 }

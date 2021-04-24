@@ -37,5 +37,8 @@
   "accept.request": "Dồng ý kết bạn",
   "addFriend.request": "Kết bạn",
   "participants.required": "Số người tham gia tối thiểu 2",
-  "notfound": "Không tìm thấy"
+  "notfound": "Không tìm thấy",
+  "minuteAgo": "Khoảng 1 phút trước",
+  "yesterday": "Hôm qua",
+  "justNow": "Vừa xong"
 }

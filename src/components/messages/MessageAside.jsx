@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import SideBarHeader from "../SideBarHeader";
 import {compose} from "redux";
 import {withTranslation} from "react-i18next";
@@ -8,6 +8,7 @@ import {FIND_CONVERSATIONS} from "../../graphql/conversations/conversations.quer
 import config from "../../config";
 import socket from "../../utils/socket";
 import {GET_CONVERSATION} from "../../constants";
+import {debounce} from 'lodash';
 
 const MessageAside = ({user, t}) => {
 
@@ -39,10 +40,26 @@ const MessageAside = ({user, t}) => {
         socket.emit(GET_CONVERSATION, id);
     }
 
+    const delayedQuery = useCallback(debounce(async q => {
+        const newFilter = (typeof filter === 'string') ? JSON.parse(filter) : filter;
+        newFilter.name = q.toString();
+        setFilter(`${JSON.stringify(newFilter)}`);
+    }, 1000), []);
+
+    const handleChange = async (e) => {
+        setLoading(true);
+        setSearch(e.target.value);
+        const temp = document.getElementById("search").value;
+        if (temp) delayedQuery(temp);
+        else setFilter(JSON.stringify({"id": `${user.id}`}));
+        setCurrentPage(1);
+    }
+
     useEffect(async () => {
         setLoading(true);
         const {data} = await query();
         if (data?.findConversations?.conversations && data?.findConversations?.conversations?.length > 0) {
+            socket.emit(GET_CONVERSATION, conversations.length > 0 ? conversations[0].id : data.findConversations.conversations[0].id);
             setConversations(data.findConversations.conversations);
         } else setConversations([]);
         setLoading(false);
@@ -63,9 +80,12 @@ const MessageAside = ({user, t}) => {
                             <div className="dropdown-menu">
                                 <a className="dropdown-item" data-chat-filter="" data-select="all-chats" href="# ">All
                                     Chats</a>
-                                <a className="dropdown-item" data-chat-filter="" data-select="friends" href="# ">Friends</a>
-                                <a className="dropdown-item" data-chat-filter="" data-select="groups" href="# ">Groups</a>
-                                <a className="dropdown-item" data-chat-filter="" data-select="unread" href="# ">Unread</a>
+                                <a className="dropdown-item" data-chat-filter="" data-select="friends"
+                                   href="# ">Friends</a>
+                                <a className="dropdown-item" data-chat-filter="" data-select="groups"
+                                   href="# ">Groups</a>
+                                <a className="dropdown-item" data-chat-filter="" data-select="unread"
+                                   href="# ">Unread</a>
                                 <a className="dropdown-item" data-chat-filter="" data-select="archived"
                                    href="# ">Archived</a>
                             </div>
@@ -73,8 +93,9 @@ const MessageAside = ({user, t}) => {
                         <form className="form-inline">
                             <div className="input-group">
                                 <input type="text" id="search"
+                                       onChange={(e) => handleChange(e)}
                                        className="form-control search border-right-0 transparent-bg pr-0"
-                                       placeholder="Search users"/>
+                                       placeholder="Search chats"/>
                                 <div className="input-group-append">
                                     <div className="input-group-text transparent-bg border-left-0" role="button">
                                         <svg className="text-muted hw-20" fill="none" viewBox="0 0 24 24"
@@ -89,11 +110,12 @@ const MessageAside = ({user, t}) => {
                     </div>
                     <ul className="contacts-list" id="chatContactTab" data-chat-list="">
                         {conversations.length > 0 ? conversations.map((c, index) => (
-                            <li onClick={(e) => showConversation(e, c.id)} key={index} id={`conversation${c.id}`} className={`contacts-item friends ${index === 0 && 'active'}`}>
+                            <li onClick={(e) => showConversation(e, c.id)} key={index} id={`conversation${c.id}`}
+                                className={`contacts-item friends ${index === 0 && 'active'}`}>
                                 <a className="contacts-link" href="javascript:;">
                                     <div className="avatar avatar-online">
                                         <img src={
-                                            c.image && (c.image.startsWith("https") ? c.image : `${config.FIREBASE_TOP_LINK+"group%2F" + c.image + config.FIREBASE_BOTTOM_LINK}`) ||
+                                            c.image && (c.image.startsWith("https") ? c.image : `${config.FIREBASE_TOP_LINK + "group%2F" + c.image + config.FIREBASE_BOTTOM_LINK}`) ||
                                             'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
                                         } alt=""/>
                                     </div>
@@ -108,7 +130,7 @@ const MessageAside = ({user, t}) => {
                                     </div>
                                 </a>
                             </li>
-                        )): (
+                        )) : (
                             <span className="text-primary">{t('notfound')}</span>
                         )}
                     </ul>
