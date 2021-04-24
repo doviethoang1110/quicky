@@ -4,122 +4,13 @@ import {showModal} from "../actions/modal.action";
 import {connect} from "react-redux";
 import AddNote from "./modals/AddNote";
 import CreateGroup from "./modals/CreateGroup";
+import NewChat from "./modals/NewChat";
 
 const Modal = ({modal}) => {
     return (
         <React.Fragment>
-            <div className="modal modal-lg-fullscreen fade" id="startConversation" tabIndex="-1" role="dialog"
-                 aria-labelledby="startConversationLabel" aria-hidden="true">
-                <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-dialog-zoom">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title" id="startConversationLabel">New Chat</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div className="modal-body p-0 hide-scrollbar">
-                            <div className="row">
-                                <div className="col-12">
-                                    <form className="form-inline w-100 p-2 border-bottom">
-                                        <div className="input-group w-100 bg-light">
-                                            <input type="text"
-                                                   className="form-control form-control-md search border-right-0 transparent-bg pr-0"
-                                                   placeholder="Search"/>
-                                            <div className="input-group-append">
-                                                <div className="input-group-text transparent-bg border-left-0" role="button">
 
-                                                    <svg className="hw-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                                    </svg>
-
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-
-                                <div className="col-12">
-                                    <ul className="list-group list-group-flush">
-
-                                        <li className="list-group-item">
-                                            <div className="media">
-                                                <div className="avatar avatar-online mr-2">
-                                                    <img src="./../../assets/media/avatar/1.png" alt=""/>
-                                                </div>
-
-                                                <div className="media-body">
-                                                    <h6 className="text-truncate">
-                                                        <a href="# " className="text-reset">Catherine Richardson</a>
-                                                    </h6>
-
-                                                    <p className="text-muted mb-0">Online</p>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li className="list-group-item">
-                                            <div className="media">
-                                                <div className="avatar avatar-online mr-2">
-                                                    <img src="./../../assets/media/avatar/2.png" alt=""/>
-                                                </div>
-
-                                                <div className="media-body">
-                                                    <h6 className="text-truncate">
-                                                        <a href="# " className="text-reset">Katherine Schneider</a>
-                                                    </h6>
-
-                                                    <p className="text-muted mb-0">Online</p>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li className="list-group-item">
-                                            <div className="media">
-                                                <div className="avatar avatar-offline mr-2">
-                                                    <img src="./../../assets/media/avatar/3.png" alt=""/>
-                                                </div>
-
-                                                <div className="media-body">
-                                                    <h6 className="text-truncate">
-                                                        <a href="# " className="text-reset">Brittany K. Williams</a>
-                                                    </h6>
-
-                                                    <p className="text-muted mb-0">Offline</p>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li className="list-group-item">
-                                            <div className="media">
-                                                <div className="avatar avatar-busy mr-2">
-                                                    <img src="./../../assets/media/avatar/4.png" alt=""/>
-                                                </div>
-                                                <div className="media-body">
-                                                    <h6 className="text-truncate"><a href="# " className="text-reset">Christina Turner</a></h6>
-                                                    <p className="text-muted mb-0">Busy</p>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li className="list-group-item">
-                                            <div className="media">
-                                                <div className="avatar avatar-away mr-2">
-                                                    <img src="./../../assets/media/avatar/5.png" alt=""/>
-                                                </div>
-
-                                                <div className="media-body">
-                                                    <h6 className="text-truncate"><a href="# " className="text-reset">Annie Richardson</a></h6>
-                                                    <p className="text-muted mb-0">Away</p>
-                                                </div>
-                                            </div>
-                                        </li>
-
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {modal.show && modal.name === 'newChat' && (<NewChat show={modal.show}/>)}
 
             {modal.show && modal.name === 'createGroup' && (<CreateGroup show={modal.show}/>)}
 

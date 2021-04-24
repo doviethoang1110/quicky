@@ -16,7 +16,7 @@ const style = {
     fontSize: '10px'
 };
 
-const SideBarHeader = ({openCreateGroupModal, openAddFriendModal, title, t}) => {
+const SideBarHeader = ({openNewChatModal, openCreateGroupModal, openAddFriendModal, title, t}) => {
 
     useEffect(() => {
 
@@ -61,8 +61,9 @@ const SideBarHeader = ({openCreateGroupModal, openAddFriendModal, title, t}) => 
                                 </a>
 
                                 <div className="dropdown-menu dropdown-menu-right">
-                                    <a className="dropdown-item" href="# " role="button" data-toggle="modal"
-                                       data-target="#startConversation">New Chat</a>
+                                    <button className="dropdown-item"
+                                            onClick={(e) => openNewChatModal()}
+                                            role="button">{t('modal.newChat')}</button>
                                     <button type="button" className="dropdown-item" role="button"
                                             onClick={(e) => openCreateGroupModal()}>{t('modal.createGroup')}
                                     </button>
@@ -82,7 +83,8 @@ const SideBarHeader = ({openCreateGroupModal, openAddFriendModal, title, t}) => 
 const mapDispatchToProps = (dispatch) => {
     return {
         openAddFriendModal: () => dispatch(showModal({name: "addFriend", show: true})),
-        openCreateGroupModal: () => dispatch(showModal({name: 'createGroup', show: true}))
+        openCreateGroupModal: () => dispatch(showModal({name: 'createGroup', show: true})),
+        openNewChatModal: () => dispatch(showModal({name: 'newChat', show: true}))
     }
 }
 

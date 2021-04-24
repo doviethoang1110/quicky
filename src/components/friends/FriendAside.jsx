@@ -131,7 +131,7 @@ const FriendAside = ({user, t}) => {
                                     <a className="contacts-link" href="# ">
                                         <div className="avatar">
                                             <img src={
-                                                u.avatar && (u.avatar.startsWith("https") ? u.avatar : `${config.FIREBASE_TOP_LINK + u.avatar + config.FIREBASE_BOTTOM_LINK}`) ||
+                                                u.avatar && (u.avatar.startsWith("https") ? u.avatar : `${config.FIREBASE_TOP_LINK + "avatar%2F" + u.avatar + config.FIREBASE_BOTTOM_LINK}`) ||
                                                 'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
                                             } alt=""/>
                                         </div>
