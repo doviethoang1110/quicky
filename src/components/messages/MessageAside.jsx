@@ -10,7 +10,9 @@ import socket from "../../utils/socket";
 import {GET_CONVERSATION} from "../../constants";
 import {debounce} from 'lodash';
 
-const MessageAside = ({user, t}) => {
+const MessageAside = ({t}) => {
+
+    const array = ['all', 'friend', 'group', 'unread'];
 
     const [search, setSearch] = useState("");
     const [totalPage, setTotalPage] = useState(null);
@@ -18,6 +20,7 @@ const MessageAside = ({user, t}) => {
     const [conversations, setConversations] = useState([]);
     const [filter, setFilter] = useState(JSON.stringify({}));
     const [loading, setLoading] = useState(false);
+    const [label, setLabel] = useState(array[0]);
 
     const query = async (page = currentPage, filter = `{}`) => {
         return await client.query({
@@ -40,30 +43,47 @@ const MessageAside = ({user, t}) => {
         socket.emit(GET_CONVERSATION, id);
     }
 
-    const delayedQuery = useCallback(debounce(async q => {
+    const delayedQuery = useCallback(debounce(async (filter, q) => {
         const newFilter = (typeof filter === 'string') ? JSON.parse(filter) : filter;
-        newFilter.name = q.toString();
+        if (q) newFilter.name = q.toString();
+        else delete newFilter.name;
         setFilter(`${JSON.stringify(newFilter)}`);
+        setCurrentPage(1);
     }, 1000), []);
 
     const handleChange = async (e) => {
-        setLoading(true);
         setSearch(e.target.value);
-        const temp = document.getElementById("search").value;
-        if (temp) delayedQuery(temp);
-        else setFilter(JSON.stringify({"id": `${user.id}`}));
-        setCurrentPage(1);
+        delayedQuery(filter, document.getElementById("search").value);
+    }
+
+    const handleFilter = async (e, value) => {
+        const newFilter = (typeof filter === 'string') ? JSON.parse(filter) : filter;
+        if (value !== 0) {
+            newFilter.type = value.toString();
+            setFilter(`${JSON.stringify(newFilter)}`);
+        } else {
+            delete newFilter.type;
+            setFilter(JSON.stringify(newFilter));
+        }
+        setLabel(value);
     }
 
     useEffect(async () => {
         setLoading(true);
-        const {data} = await query();
+        const {data} = await query(currentPage, filter);
         if (data?.findConversations?.conversations && data?.findConversations?.conversations?.length > 0) {
-            socket.emit(GET_CONVERSATION, conversations.length > 0 ? conversations[0].id : data.findConversations.conversations[0].id);
             setConversations(data.findConversations.conversations);
+            setTotalPage(data.findConversations.totalPage);
+            socket.emit(GET_CONVERSATION, conversations.length > 0 ? conversations[0].id : data.findConversations.conversations[0].id);
         } else setConversations([]);
         setLoading(false);
     }, [filter, currentPage]);
+
+    const handleScroll = async ({target: {scrollTop, clientHeight, scrollHeight}}) => {
+        if (scrollTop + clientHeight >= scrollHeight) {
+            if (currentPage + 1 <= totalPage) setCurrentPage(currentPage + 1);
+        }
+    }
 
     return (
         <div className="tab-pane active" id="chats-content">
@@ -75,25 +95,20 @@ const MessageAside = ({user, t}) => {
                             <button className="btn btn-outline-default dropdown-toggle" type="button"
                                     data-chat-filter-list="" data-toggle="dropdown" aria-haspopup="true"
                                     aria-expanded="false">
-                                All Chats
+                                {t(`filter.${label}`)}
                             </button>
                             <div className="dropdown-menu">
-                                <a className="dropdown-item" data-chat-filter="" data-select="all-chats" href="# ">All
-                                    Chats</a>
-                                <a className="dropdown-item" data-chat-filter="" data-select="friends"
-                                   href="# ">Friends</a>
-                                <a className="dropdown-item" data-chat-filter="" data-select="groups"
-                                   href="# ">Groups</a>
-                                <a className="dropdown-item" data-chat-filter="" data-select="unread"
-                                   href="# ">Unread</a>
-                                <a className="dropdown-item" data-chat-filter="" data-select="archived"
-                                   href="# ">Archived</a>
+                                {array.length > 0 && array.map((a, index) => (
+                                    <button key={index} onClick={(e) => handleFilter(e, a)}
+                                            className="dropdown-item">{t(`filter.${a}`)}</button>
+                                ))}
                             </div>
                         </div>
                         <form className="form-inline">
                             <div className="input-group">
                                 <input type="text" id="search"
                                        onChange={(e) => handleChange(e)}
+                                       value={search}
                                        className="form-control search border-right-0 transparent-bg pr-0"
                                        placeholder="Search chats"/>
                                 <div className="input-group-append">
@@ -108,7 +123,9 @@ const MessageAside = ({user, t}) => {
                             </div>
                         </form>
                     </div>
-                    <ul className="contacts-list" id="chatContactTab" data-chat-list="">
+                    <ul className="contacts-list" style={{overflowY: 'auto', height: 'auto'}}
+                        id="chatContactTab" data-chat-list="" onScroll={handleScroll}>
+                        {loading && <span className="text-primary">Loading...</span>}
                         {conversations.length > 0 ? conversations.map((c, index) => (
                             <li onClick={(e) => showConversation(e, c.id)} key={index} id={`conversation${c.id}`}
                                 className={`contacts-item friends ${index === 0 && 'active'}`}>

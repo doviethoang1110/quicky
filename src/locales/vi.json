@@ -40,5 +40,9 @@
   "notfound": "Không tìm thấy",
   "minuteAgo": "Khoảng 1 phút trước",
   "yesterday": "Hôm qua",
-  "justNow": "Vừa xong"
+  "justNow": "Vừa xong",
+  "filter.all": "Tất cả",
+  "filter.friend": "Bạn bè",
+  "filter.group": "Nhóm",
+  "filter.unread": "Chưa đọc"
 }

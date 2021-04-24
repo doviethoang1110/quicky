@@ -41,5 +41,9 @@
   "notfound": "Not found",
   "minuteAgo": "a minute ago",
   "yesterday": "yesterday",
-  "justNow": "Just now"
+  "justNow": "Just now",
+  "filter.all": "All chats",
+  "filter.friend": "Friends",
+  "filter.group": "Group",
+  "filter.unread": "Unread"
 }
