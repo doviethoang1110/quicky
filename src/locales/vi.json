@@ -36,5 +36,6 @@
   "remove.request": "Từ chối lời mời",
   "accept.request": "Dồng ý kết bạn",
   "addFriend.request": "Kết bạn",
-  "participants.required": "Số người tham gia tối thiểu 2"
+  "participants.required": "Số người tham gia tối thiểu 2",
+  "notfound": "Không tìm thấy"
 }

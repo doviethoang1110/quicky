@@ -37,5 +37,6 @@
   "groupName.required": "Group name is required",
   "groupName.minLength": "Group name is min 10 characters",
   "groupName.maxLength": "Group name is max 50 characters",
-  "participants.required": "Participants is min 2"
+  "participants.required": "Participants is min 2",
+  "notfound": "Not found"
 }

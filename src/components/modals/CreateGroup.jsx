@@ -48,7 +48,7 @@ const CreateGroup = ({hideCreateGroup, show, t, user}) => {
         setLoading(true);
         const {data} = await query(currentPage, filter);
         let newArray;
-        if (data?.findListFriends?.users) {
+        if (data?.findListFriends?.users && data?.findListFriends?.users?.length > 0) {
             if (currentPage > 1) {
                 newArray = [
                     ...users,
@@ -65,8 +65,8 @@ const CreateGroup = ({hideCreateGroup, show, t, user}) => {
             }
             setUsers(newArray);
             if (+data.findListFriends.totalPage !== +totalPage) setTotalPage(data.findListFriends.totalPage);
-            setLoading(false);
-        }
+        } else setUsers([]);
+        setLoading(false);
     }, [filter, currentPage]);
 
     const delayedQuery = useCallback(debounce(async q => {
@@ -244,7 +244,7 @@ const CreateGroup = ({hideCreateGroup, show, t, user}) => {
                                         <label className="media-label" htmlFor={`chx-user-${u.id}`}></label>
                                     </li>
                                 )) : (
-                                    <span className="text-primary">Not found</span>
+                                    <span className="text-primary">{t('notfound')}</span>
                                 )}
                             </ul>
                             {loading && (<span className="text-primary">Loading...</span>)}

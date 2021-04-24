@@ -30,19 +30,30 @@ const Users = (props) => {
         userActionId: null
     });
 
+    const receiveRequest = (data) => {
+        setUser({...user, ...data});
+        showToast('success', `${data.name} send you an add friend request`);
+    }
+
+    const removeRequest = (data) => {
+        setUser({...user, ...data});
+        showToast('success', `${data.name} reject your add friend request`);
+    }
+
+    const acceptRequest = data => {
+        setUser({...user, ...data});
+        showToast('success', `${data.name} accept your add friend request`);
+    }
+
     useEffect(() => {
-        socket.on(RECEIVED_ADD_FRIEND_REQUEST, (data) => {
-            setUser({...user, ...data});
-            showToast('success', `${data.name} send you an add friend request`);
-        });
-        socket.on(REMOVE_ADD_FRIEND_REQUEST_SUCCESS, (data) => {
-            setUser({...user, ...data});
-            showToast('success', `${data.name} reject your add friend request`);
-        });
-        socket.on(ACCEPT_ADD_FRIEND_REQUEST_SUCCESS, data => {
-            setUser({...user, ...data});
-            showToast('success', `${data.name} accept your add friend request`);
-        })
+        socket.on(RECEIVED_ADD_FRIEND_REQUEST, receiveRequest);
+        socket.on(REMOVE_ADD_FRIEND_REQUEST_SUCCESS, removeRequest);
+        socket.on(ACCEPT_ADD_FRIEND_REQUEST_SUCCESS, acceptRequest);
+        return () => {
+            socket.off(RECEIVED_ADD_FRIEND_REQUEST, receiveRequest);
+            socket.off(REMOVE_ADD_FRIEND_REQUEST_SUCCESS, removeRequest);
+            socket.off(ACCEPT_ADD_FRIEND_REQUEST_SUCCESS, acceptRequest);
+        }
     }, []);
 
     useEffect(async () => {
@@ -93,13 +104,16 @@ const Users = (props) => {
                                     <h5 className="mb-1">{user.name}</h5>
                                     <div className="d-flex mt-2">
                                         {(!user.status) && (
-                                            <button onClick={(e) => addFriendRequest(e, user.id)} className="btn btn-primary">{props.t("addFriend.request")}</button>
+                                            <button onClick={(e) => addFriendRequest(e, user.id)}
+                                                    className="btn btn-primary">{props.t("addFriend.request")}</button>
                                         )}
                                         {(user.status && user.status === 1) && (user.userActionId === props.userState.id) && (
-                                            <button onClick={(e) => removeFriendRequest(e, user.id)} className="btn btn-danger">{props.t("remove.request")}</button>
+                                            <button onClick={(e) => removeFriendRequest(e, user.id)}
+                                                    className="btn btn-danger">{props.t("remove.request")}</button>
                                         )}
                                         {(user.status && user.status === 1) && (user.userActionId !== props.userState.id) && (
-                                            <button onClick={(e) => acceptFriendRequest(e, user.id)} className="btn btn-success">{props.t("accept.request")}</button>
+                                            <button onClick={(e) => acceptFriendRequest(e, user.id)}
+                                                    className="btn btn-success">{props.t("accept.request")}</button>
                                         )}
                                         {user.status === 3 && (
                                             <>
