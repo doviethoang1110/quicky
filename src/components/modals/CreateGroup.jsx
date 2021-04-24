@@ -39,7 +39,7 @@ const CreateGroup = ({hideCreateGroup, show, t, user}) => {
             variables: {
                 filter: `${filter}`,
                 page,
-                limit: 1
+                limit: 4
             }
         });
     }
@@ -47,11 +47,26 @@ const CreateGroup = ({hideCreateGroup, show, t, user}) => {
     useEffect(async () => {
         setLoading(true);
         const {data} = await query(currentPage, filter);
-        const newArray = uniqBy([...users, ...data.findListFriends.users.map(u => ({...u, status: false}))], e => e.id);
-        console.log(newArray)
-        setUsers(newArray);
-        if (+data.findListFriends.totalPage !== +totalPage) setTotalPage(data.findListFriends.totalPage);
-        setLoading(false);
+        let newArray;
+        if (data?.findListFriends?.users) {
+            if (currentPage > 1) {
+                newArray = [
+                    ...users,
+                    ...data.findListFriends.users].map(e => ({
+                    ...e,
+                    status: participants.find(p => p.id === e.id) ? true : false
+                }));
+
+            } else {
+                newArray = data.findListFriends.users.map(e => ({
+                    ...e,
+                    status: participants.find(p => p.id === e.id) ? true : false
+                }));
+            }
+            setUsers(newArray);
+            if (+data.findListFriends.totalPage !== +totalPage) setTotalPage(data.findListFriends.totalPage);
+            setLoading(false);
+        }
     }, [filter, currentPage]);
 
     const delayedQuery = useCallback(debounce(async q => {
@@ -69,7 +84,7 @@ const CreateGroup = ({hideCreateGroup, show, t, user}) => {
         setCurrentPage(1);
     }
 
-    const onSubmit = async (data) => {
+    const onSubmit = async () => {
         if (step === 2) {
             if (participants.length < 2) {
                 document.getElementById("errorMsg").innerText = t('participants.required');
@@ -78,7 +93,7 @@ const CreateGroup = ({hideCreateGroup, show, t, user}) => {
             const param = {
                 name: getValues().groupName,
                 image,
-                participants,
+                participants: participants.map(p => p.id),
                 type: 'group',
                 creatorId: user.id.toString()
             };
@@ -101,12 +116,12 @@ const CreateGroup = ({hideCreateGroup, show, t, user}) => {
         setStep(step + move);
     }
 
-    const handleCheckbox = (e, id) => {
+    const handleCheckbox = (e, data) => {
         const newArray = [...participants];
-        if (e.target.checked) newArray.push(id);
-        else newArray.splice(newArray.indexOf(id), 1);
+        if (e.target.checked) newArray.push(data);
+        else newArray.splice(newArray.indexOf(data), 1);
         setParticipants(newArray);
-        users[users.indexOf(users.find(p => p.id === id))].status = e.target.checked;
+        users[users.indexOf(users.find(p => p.id === data.id))].status = e.target.checked;
         setUsers([...users]);
     }
 
@@ -191,10 +206,13 @@ const CreateGroup = ({hideCreateGroup, show, t, user}) => {
                                         </div>
                                     </div>
                                 </div>
+                                {participants.length > 0 && participants.map(p => (
+                                    <span className="text-primary">{p.name}, </span>
+                                ))}
                             </form>
                         </div>
                         <div className="col-12 px-0">
-                            <ul onScroll={(e) => handleScroll(e)} style={{overflowY: 'auto', height: '30px'}}
+                            <ul onScroll={(e) => handleScroll(e)} style={{overflowY: 'auto', height: '250px'}}
                                 className="list-group list-group-flush">
                                 {users.length > 0 ? users.map((u, index) => (
                                     <li key={index} className="list-group-item">
@@ -214,7 +232,8 @@ const CreateGroup = ({hideCreateGroup, show, t, user}) => {
                                             </div>
                                             <div className="media-options">
                                                 <div className="custom-control custom-checkbox">
-                                                    <input onChange={(e) => handleCheckbox(e, u.id)} checked={u.status}
+                                                    <input onChange={(e) => handleCheckbox(e, {id: u.id, name: u.name})}
+                                                           checked={u.status}
                                                            className="custom-control-input" type="checkbox"
                                                            id={`chx-user-${u.id}`}/>
                                                     <label className="custom-control-label"
