@@ -7,7 +7,7 @@ import client from "../../plugins/apollo";
 import {FIND_CONVERSATIONS} from "../../graphql/conversations/conversations.query";
 import config from "../../config";
 import socket from "../../utils/socket";
-import {GET_CONVERSATION, SEND_NEW_CONVERSATION} from "../../constants";
+import {GET_CONVERSATION, GET_NEW_CHAT, SEND_NEW_CONVERSATION} from "../../constants";
 import {debounce} from 'lodash';
 
 const MessageAside = ({t}) => {
@@ -35,10 +35,21 @@ const MessageAside = ({t}) => {
     }
 
     const handleSocket = data => {
-        setConversations([data, ...conversations]);
+        const found = conversations.find(c => c.id === null);
+        if (found) {
+            conversations[conversations.indexOf(found)] = data;
+            setConversations([...conversations]);
+        } else {
+            setConversations([data, ...conversations]);
+        }
+        socket.emit(GET_NEW_CHAT, data);
     };
 
     useEffect(() => {
+        if (conversations.length > 0) {
+            document.getElementById(`conversation${conversations[0].id}`).classList.add("active")
+            socket.emit(GET_CONVERSATION, conversations[0].id)
+        }
         socket.on(SEND_NEW_CONVERSATION, handleSocket);
         return () => {
             socket.off(SEND_NEW_CONVERSATION, handleSocket);
@@ -50,8 +61,13 @@ const MessageAside = ({t}) => {
         for (let i = 0; i < document.getElementsByClassName("contacts-item").length; i++) {
             document.getElementsByClassName("contacts-item")[i].classList.remove("active")
         }
-        document.getElementById(`conversation${id}`).classList.add("active");
-        socket.emit(GET_CONVERSATION, id);
+        const found = conversations.find(c => c.id === null);
+        if (found) {
+            setConversations([...conversations.filter((c => c.id !== null))])
+        } else {
+            document.getElementById(`conversation${id}`).classList.add("active");
+            socket.emit(GET_CONVERSATION, id);
+        }
     }
 
     const delayedQuery = useCallback(debounce(async (filter, q) => {
@@ -85,7 +101,6 @@ const MessageAside = ({t}) => {
         if (data?.findConversations?.conversations && data?.findConversations?.conversations?.length > 0) {
             setConversations(data.findConversations.conversations);
             setTotalPage(data.findConversations.totalPage);
-            socket.emit(GET_CONVERSATION, conversations.length > 0 ? conversations[0].id : data.findConversations.conversations[0].id);
         } else setConversations([]);
         setLoading(false);
     }, [filter, currentPage]);
@@ -139,7 +154,7 @@ const MessageAside = ({t}) => {
                         {loading && <span className="text-primary">Loading...</span>}
                         {conversations.length > 0 ? conversations.map((c, index) => (
                             <li onClick={(e) => showConversation(e, c.id)} key={index} id={`conversation${c.id}`}
-                                className={`contacts-item friends ${index === 0 && 'active'}`}>
+                                className={`contacts-item friends`}>
                                 <a className="contacts-link" href="javascript:;">
                                     <div className="avatar avatar-online">
                                         <img src={

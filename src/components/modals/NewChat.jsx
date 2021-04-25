@@ -8,8 +8,11 @@ import {debounce} from 'lodash';
 import {withTranslation} from "react-i18next";
 import {compose} from "redux";
 import config from "../../config";
+import socket from "../../utils/socket";
+import {NEW_CHAT} from "../../constants";
+import {hideLoading, showLoading} from "../../actions/loading.action";
 
-const NewChat = ({hideNewChatModal, show, user, t}) => {
+const NewChat = ({hideNewChatModal, show, user, t, showLoading, hideLoading}) => {
 
     const [users, setUsers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -57,7 +60,6 @@ const NewChat = ({hideNewChatModal, show, user, t}) => {
         setLoading(true);
         const {data} = await query(currentPage, filter);
         let newArray;
-        console.log(filter)
         if (data?.findListFriends?.users && data?.findListFriends?.users?.length > 0) {
             if (currentPage > 1) newArray = [...users, ...data.findListFriends.users];
             else newArray = data.findListFriends.users;
@@ -67,11 +69,20 @@ const NewChat = ({hideNewChatModal, show, user, t}) => {
         setLoading(false);
     }, [currentPage, filter]);
 
+    const createNewChat = async (e, data) => {
+        await showLoading()
+        const {id, name, type = 'single', avatar: image = null} = data;
+        const param = {id: null, name, type, image, creatorId: user.id, participants: [user.id.toString(), id.toString()]};
+        socket.emit(NEW_CHAT, param);
+        await hideNewChatModal();
+        await hideLoading();
+    }
+
     return (
         <React.Fragment>
             <Modal onHide={hideNewChatModal} show={show} className="modal-lg-fullscreen">
                 <Modal.Header>
-                    <h5 className="modal-title" id="startConversationLabel">New Chat</h5>
+                    <h5 className="modal-title" id="startConversationLabel">{t('modal.newChat')}</h5>
                     <button onClick={hideNewChatModal} type="button" className="close" data-dismiss="modal"
                             aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -107,7 +118,7 @@ const NewChat = ({hideNewChatModal, show, user, t}) => {
                                 style={{overflowY: 'auto', height: '350px'}}>
                                 {loading && (<span className="text-primary">Loading...</span>)}
                                 {users.length > 0 ? users.map((u, index) => (
-                                    <li key={index} className="list-group-item">
+                                    <li onClick={(e) => createNewChat(e, u)} key={index} className="list-group-item">
                                         <div className="media">
                                             <div className="avatar avatar-online mr-2">
                                                 <img src={
@@ -143,6 +154,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
+        showLoading: () => dispatch(showLoading()),
+        hideLoading: () => dispatch(hideLoading()),
         hideNewChatModal: () => dispatch(hideModal())
     }
 }

@@ -58,7 +58,7 @@ const MessageContent = ({t, user}) => {
     const handleSocket = data => {
         if (data) {
             const {id, name, type, image, participants, messages} = data;
-            if (messages.length > 0) {
+            if (messages?.length > 0) {
                 setMessages(messages.map(m => ({
                     ...m,
                     createdAt: formatMessageDatetime(m.createdAt, t('justNow'), t('minuteAgo'), t('yesterday'))
@@ -444,7 +444,7 @@ const MessageContent = ({t, user}) => {
                                     </div>
                                 </div>
                             )) : (
-                                <span className="text-primary">{t('notfound')}</span>
+                                <span className="text-primary">{t('newChat')}</span>
                             )}
                             <div className="chat-finished" id="chat-finished"></div>
                         </div>

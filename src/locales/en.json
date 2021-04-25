@@ -46,5 +46,6 @@
   "filter.all": "All chats",
   "filter.friend": "Friends",
   "filter.group": "Group",
-  "filter.unread": "Unread"
+  "filter.unread": "Unread",
+  "newChat": "Start your conversation"
 }
