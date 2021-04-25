@@ -7,7 +7,7 @@ import client from "../../plugins/apollo";
 import {FIND_CONVERSATIONS} from "../../graphql/conversations/conversations.query";
 import config from "../../config";
 import socket from "../../utils/socket";
-import {GET_CONVERSATION} from "../../constants";
+import {GET_CONVERSATION, SEND_NEW_CONVERSATION} from "../../constants";
 import {debounce} from 'lodash';
 
 const MessageAside = ({t}) => {
@@ -33,6 +33,17 @@ const MessageAside = ({t}) => {
             }
         });
     }
+
+    const handleSocket = data => {
+        setConversations([data, ...conversations]);
+    };
+
+    useEffect(() => {
+        socket.on(SEND_NEW_CONVERSATION, handleSocket);
+        return () => {
+            socket.off(SEND_NEW_CONVERSATION, handleSocket);
+        }
+    }, [conversations]);
 
     const showConversation = (e, id) => {
         e.preventDefault();
@@ -142,7 +153,7 @@ const MessageAside = ({t}) => {
                                             <div className="chat-time">Just now</div>
                                         </div>
                                         <div className="contacts-texts">
-                                            <p className="text-truncate">{c.lastMessage.message || ''}</p>
+                                            <p className="text-truncate">{c?.lastMessage?.message || ''}</p>
                                         </div>
                                     </div>
                                 </a>

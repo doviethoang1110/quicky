@@ -13,6 +13,8 @@ import {storage} from "../../plugins/firebase";
 import axiosService from "../../utils/axiosService";
 import {showToast} from "../../plugins/sweetAlert";
 import {debounce, uniqBy} from 'lodash';
+import socket from "../../utils/socket";
+import {CREATE_CONVERSATION} from "../../constants";
 
 const CreateGroup = ({hideCreateGroup, show, t, user}) => {
 
@@ -101,7 +103,10 @@ const CreateGroup = ({hideCreateGroup, show, t, user}) => {
                 const response = await axiosService("conversations", "POST", param);
                 if (response.data.code === 422) {
                     showToast('error', response.data.message)
-                } else setStep(step + 1);
+                } else {
+                    socket.emit(CREATE_CONVERSATION, response.data.result);
+                    setStep(step + 1);
+                }
             } catch (e) {
                 console.log('error in create conversation', e.message);
                 showToast('error', e.message)
