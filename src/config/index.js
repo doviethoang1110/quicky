@@ -2,6 +2,7 @@ import development from './development.config';
 import production from './production.config';
 
 let config = {
+    TINY_MCE_KEY: "gsy092012zjj2ycmtt1hjy0efuj1rn7mvzsqbg6ixo5yji74",
     FIREBASE_KEY: "AIzaSyBameRqFrRvyKrqcQyAjViEJNyE5f5Q9_4",
     FIREBASE_DOMAIN: "messenger-94814.firebaseapp.com",
     FIREBASE_PROJECT_ID: "messenger-94814",

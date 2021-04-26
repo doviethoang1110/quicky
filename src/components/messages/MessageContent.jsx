@@ -10,6 +10,7 @@ import {connect} from "react-redux";
 import './Loading.css';
 import client from "../../plugins/apollo";
 import {FIND_MESSAGES} from "../../graphql/messages/message.query";
+import {Editor} from "@tinymce/tinymce-react";
 
 const MessageContent = ({t, user}) => {
 
@@ -27,6 +28,7 @@ const MessageContent = ({t, user}) => {
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPage, setTotalPage] = useState(null);
+    const [message, setMessage] = useState("");
 
     const query = async (page = currentPage) => {
         return await client.query({
@@ -83,6 +85,10 @@ const MessageContent = ({t, user}) => {
         if (scrollTop === 0) {
             if (currentPage + 1 === 2 || currentPage + 1 <= totalPage) setCurrentPage(currentPage + 1);
         }
+    }
+
+    const handleEditorChange = (content) => {
+        setMessage(content);
     }
 
     return (
@@ -514,10 +520,23 @@ const MessageContent = ({t, user}) => {
                             </div>
                         </div>
                     </div>
-
-                    <textarea className="form-control emojionearea-form-control" id="messageInput" rows="1"
-                              placeholder="Type your message here..."></textarea>
-                    <div className="btn btn-primary btn-icon send-icon rounded-circle text-light mb-1" role="button">
+                    <Editor
+                        apiKey={config.TINY_MCE_KEY}
+                        initialValue={message}
+                        init={{
+                            height: '108px',
+                            // content_style: "p {margin-left: 0px;padding-left: 40px;padding-right: 40px}",
+                            plugins: "emoticons",
+                            toolbar: `undo redo | emoticons`,
+                            toolbar_location: "bottom",
+                            menubar: false,
+                            statusbar: false,
+                            branding: false,
+                        }}
+                        onEditorChange={handleEditorChange}
+                    />
+                    <div style={{marginRight: '10px'}}
+                         className="btn btn-primary btn-icon send-icon rounded-circle text-light mb-1" role="button">
                         <svg className="hw-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                   d="M14 5l7 7m0 0l-7 7m7-7H3"/>
