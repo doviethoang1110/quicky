@@ -8,7 +8,6 @@ const SideBar = () => {
     const [pathName, setPathName] = useState(window.location.pathname);
 
     useEffect(() => {
-        console.log('vào',pathName)
         setPathName(window.location.pathname);
     }, [window.location.pathname])
     return (

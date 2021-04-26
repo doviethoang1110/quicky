@@ -13,3 +13,33 @@ export const FIND_USERS = gql`
         }
     }
 `;
+
+export const FIND_USERS_BY_ID = gql`
+    query findUsersById($id: Int!) {
+        getUsersById(id: $id) {
+            id
+            name
+            birthday
+            phone
+            avatar
+            email
+            userActionId
+            status
+        }
+    }
+`;
+
+export const FIND_LIST_FRIENDS = gql`
+    query findListFriends($filter: String, $page: Int, $limit: Int) {
+        findListFriends(filter: $filter, page: $page, limit: $limit) {
+            currentPage
+            totalPage
+            users {
+                id
+                name
+                email
+                avatar
+            }
+        }
+    }
+`;

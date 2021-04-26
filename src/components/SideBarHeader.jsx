@@ -1,10 +1,11 @@
 import React, {useEffect} from 'react';
 import socket from "../utils/socket";
-import {RECEIVED_ADD_FRIEND_REQUEST} from "../constants";
+import {RECEIVED_ADD_FRIEND_REQUEST, REMOVE_ADD_FRIEND_REQUEST_SUCCESS} from "../constants";
 import {connect} from "react-redux";
 import {showModal} from "../actions/modal.action";
 import {withTranslation} from 'react-i18next';
 import {compose} from "redux";
+import {showToast} from "../plugins/sweetAlert";
 
 const style = {
     position: 'absolute',
@@ -15,12 +16,10 @@ const style = {
     fontSize: '10px'
 };
 
-const SideBarHeader = ({openAddFriendModal, title, t}) => {
+const SideBarHeader = ({openNewChatModal, openCreateGroupModal, openAddFriendModal, title, t}) => {
 
     useEffect(() => {
-        socket.on(RECEIVED_ADD_FRIEND_REQUEST, (data) => {
-            console.log('nhận', data)
-        });
+
     }, []);
 
     return (
@@ -62,10 +61,12 @@ const SideBarHeader = ({openAddFriendModal, title, t}) => {
                                 </a>
 
                                 <div className="dropdown-menu dropdown-menu-right">
-                                    <a className="dropdown-item" href="# " role="button" data-toggle="modal"
-                                       data-target="#startConversation">New Chat</a>
-                                    <a className="dropdown-item" href="# " role="button" data-toggle="modal"
-                                       data-target="#createGroup">Create Group</a>
+                                    <button className="dropdown-item"
+                                            onClick={(e) => openNewChatModal()}
+                                            role="button">{t('modal.newChat')}</button>
+                                    <button type="button" className="dropdown-item" role="button"
+                                            onClick={(e) => openCreateGroupModal()}>{t('modal.createGroup')}
+                                    </button>
                                     <button type="button" className="dropdown-item" role="button"
                                             onClick={(e) => openAddFriendModal()}>{t('modal.addFriend')}
                                     </button>
@@ -74,39 +75,6 @@ const SideBarHeader = ({openAddFriendModal, title, t}) => {
                         </li>
                     </ul>
                 </div>
-                <div className="sidebar-sub-header">
-                    <div className="dropdown mr-2">
-                        <button className="btn btn-outline-default dropdown-toggle" type="button"
-                                data-chat-filter-list="" data-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="false">
-                            All Chats
-                        </button>
-                        <div className="dropdown-menu">
-                            <a className="dropdown-item" data-chat-filter="" data-select="all-chats" href="# ">All
-                                Chats</a>
-                            <a className="dropdown-item" data-chat-filter="" data-select="friends" href="# ">Friends</a>
-                            <a className="dropdown-item" data-chat-filter="" data-select="groups" href="# ">Groups</a>
-                            <a className="dropdown-item" data-chat-filter="" data-select="unread" href="# ">Unread</a>
-                            <a className="dropdown-item" data-chat-filter="" data-select="archived"
-                               href="# ">Archived</a>
-                        </div>
-                    </div>
-                    <form className="form-inline">
-                        <div className="input-group">
-                            <input type="text" className="form-control search border-right-0 transparent-bg pr-0"
-                                   placeholder="Search users"/>
-                            <div className="input-group-append">
-                                <div className="input-group-text transparent-bg border-left-0" role="button">
-                                    <svg className="text-muted hw-20" fill="none" viewBox="0 0 24 24"
-                                         stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
             </div>
         </React.Fragment>
     )
@@ -114,7 +82,9 @@ const SideBarHeader = ({openAddFriendModal, title, t}) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        openAddFriendModal: () => dispatch(showModal({name: "addFriend", show: true}))
+        openAddFriendModal: () => dispatch(showModal({name: "addFriend", show: true})),
+        openCreateGroupModal: () => dispatch(showModal({name: 'createGroup', show: true})),
+        openNewChatModal: () => dispatch(showModal({name: 'newChat', show: true}))
     }
 }
 

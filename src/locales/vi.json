@@ -6,6 +6,8 @@
   "title.friend": "Bạn bè",
   "title.profile": "Trang cá nhân",
   "modal.addFriend": "Thêm bạn bè",
+  "modal.createGroup": "Tạo nhóm",
+  "modal.newChat": "Cuộc trò chuyện mới",
   "label.username": "Tên người dùng",
   "appBar.translate": "Phiên dịch",
   "appBar.note": "Ghi chú",
@@ -31,5 +33,18 @@
   "tag.1": "Cá nhân",
   "tag.2": "Quan trọng",
   "tag.3": "Công việc",
-  "tag.4": "Sở thích"
+  "tag.4": "Sở thích",
+  "remove.request": "Từ chối lời mời",
+  "accept.request": "Dồng ý kết bạn",
+  "addFriend.request": "Kết bạn",
+  "participants.required": "Số người tham gia tối thiểu 2",
+  "notfound": "Không tìm thấy",
+  "minuteAgo": "Khoảng 1 phút trước",
+  "yesterday": "Hôm qua",
+  "justNow": "Vừa xong",
+  "filter.all": "Tất cả",
+  "filter.friend": "Bạn bè",
+  "filter.group": "Nhóm",
+  "filter.unread": "Chưa đọc",
+  "newChat": "Bắt đầu trò chuyện"
 }
