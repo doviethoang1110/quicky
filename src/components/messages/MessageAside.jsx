@@ -10,7 +10,7 @@ import socket from "../../utils/socket";
 import {GET_CONVERSATION, GET_NEW_CHAT, SEND_NEW_CONVERSATION} from "../../constants";
 import {debounce} from 'lodash';
 
-const MessageAside = ({t}) => {
+const MessageAside = ({t, user}) => {
 
     const array = ['all', 'friend', 'group', 'unread'];
 
@@ -18,7 +18,7 @@ const MessageAside = ({t}) => {
     const [totalPage, setTotalPage] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [conversations, setConversations] = useState([]);
-    const [filter, setFilter] = useState(JSON.stringify({}));
+    const [filter, setFilter] = useState(JSON.stringify({usersId: user.id}));
     const [loading, setLoading] = useState(false);
     const [label, setLabel] = useState(array[0]);
 

@@ -22,6 +22,8 @@ export const CREATE_CONVERSATION = "CREATE_CONVERSATION";
 export const SEND_NEW_CONVERSATION = "SEND_NEW_CONVERSATION";
 export const NEW_CHAT = "NEW_CHAT";
 export const GET_NEW_CHAT = "GET_NEW_CHAT";
+export const SEND_MESSAGE = "SEND_MESSAGE";
+export const RECEIVE_MESSAGE = "RECEIVE_MESSAGE";
 
 // user
 export const USER_LOGIN = "USER_LOGIN";

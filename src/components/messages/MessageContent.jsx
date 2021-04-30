@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import socket from "../../utils/socket";
-import {GET_CONVERSATION_SUCCESS} from "../../constants";
+import {GET_CONVERSATION_SUCCESS, RECEIVE_MESSAGE, SEND_MESSAGE} from "../../constants";
 import config from "../../config";
 import {formatMessageDatetime} from "../../utils/helpers";
 import {withTranslation} from "react-i18next";
@@ -11,6 +11,7 @@ import './Loading.css';
 import client from "../../plugins/apollo";
 import {FIND_MESSAGES} from "../../graphql/messages/message.query";
 import {Editor} from "@tinymce/tinymce-react";
+import Typing from "../typing/Typing";
 
 const MessageContent = ({t, user}) => {
 
@@ -74,10 +75,16 @@ const MessageContent = ({t, user}) => {
         }
     }
 
+    const handleReceiveMessage = data => {
+        console.log('vào ', data)
+    }
+
     useEffect(() => {
         socket.on(GET_CONVERSATION_SUCCESS, handleSocket);
+        socket.on(RECEIVE_MESSAGE, handleReceiveMessage);
         return () => {
             socket.off(GET_CONVERSATION_SUCCESS, handleSocket);
+            socket.off(RECEIVE_MESSAGE, handleReceiveMessage);
         }
     }, []);
 
@@ -89,6 +96,51 @@ const MessageContent = ({t, user}) => {
 
     const handleEditorChange = (content) => {
         setMessage(content);
+    }
+
+    const handleMessage = (message) => {
+        if (message) {
+            message = message.replace('<p>', '');
+            message = message.replace('</p>', '');
+            const request = {
+                conversationsId: conversation.id,
+                message,
+                usersId: user.id
+            }
+            socket.emit(SEND_MESSAGE, request);
+            setMessage("");
+        }
+    }
+
+    const sendMessage = (e) => {
+        if (e.keyCode === 13) {
+            e.preventDefault();
+            handleMessage(message);
+        }
+        if (e._reactName === 'onClick') {
+            handleMessage(message);
+        }
+    }
+
+    const typing = () => {
+        let data;
+        if (conversation.type === 'group')
+            data = {
+                conversationsId: conversation.id, name: user.name, image: user.avatar, type: conversation.type,
+                participants: conversation.participants
+            }
+        else data = {
+            conversationId: conversation.id, type: conversation.type,
+            participants: conversation.participants
+        }
+        socket.emit("TYPING", data);
+    }
+
+    const clearTyping = () => {
+        socket.emit("CLEAR_TYPING", {
+            conversationsId: conversation.id, name: user.name,
+            participants: conversation.participants
+        });
     }
 
     return (
@@ -125,8 +177,6 @@ const MessageContent = ({t, user}) => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                           d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
-
-
                             </a>
                         </li>
 
@@ -137,23 +187,17 @@ const MessageContent = ({t, user}) => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                           d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                                 </svg>
-
-
                             </a>
                         </li>
                         <li className="nav-item list-inline-item d-none d-sm-block mr-0">
                             <div className="dropdown">
                                 <a className="nav-link text-muted px-1" href="# " role="button" title="Details"
                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-
                                     <svg className="hw-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                               d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
                                     </svg>
-
-
                                 </a>
-
                                 <div className="dropdown-menu dropdown-menu-right">
                                     <a className="dropdown-item align-items-center d-flex" href="# "
                                        data-chat-info-toggle="">
@@ -163,8 +207,6 @@ const MessageContent = ({t, user}) => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                   d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
-
-
                                         <span>View Info</span>
                                     </a>
 
@@ -178,8 +220,6 @@ const MessageContent = ({t, user}) => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                   d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
                                         </svg>
-
-
                                         <span>Mute Notifications</span>
                                     </a>
                                     <a className="dropdown-item align-items-center d-flex" href="# ">
@@ -189,8 +229,6 @@ const MessageContent = ({t, user}) => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                   d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                         </svg>
-
-
                                         <span>Wallpaper</span>
                                     </a>
                                     <a className="dropdown-item align-items-center d-flex" href="# ">
@@ -200,8 +238,6 @@ const MessageContent = ({t, user}) => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                   d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
                                         </svg>
-
-
                                         <span>Archive</span>
                                     </a>
                                     <a className="dropdown-item align-items-center d-flex" href="# ">
@@ -211,8 +247,6 @@ const MessageContent = ({t, user}) => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
-
-
                                         <span>Delete</span>
                                     </a>
                                     <a className="dropdown-item align-items-center d-flex text-danger" href="# ">
@@ -222,8 +256,6 @@ const MessageContent = ({t, user}) => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                   d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                                         </svg>
-
-
                                         <span>Block</span>
                                     </a>
                                 </div>
@@ -238,10 +270,7 @@ const MessageContent = ({t, user}) => {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                               d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
                                     </svg>
-
-
                                 </a>
-
                                 <div className="dropdown-menu dropdown-menu-right">
                                     <a className="dropdown-item align-items-center d-flex" href="# ">
 
@@ -261,11 +290,8 @@ const MessageContent = ({t, user}) => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                         </svg>
-
-
                                         <span>Search</span>
                                     </a>
-
                                     <a className="dropdown-item align-items-center d-flex" href="# "
                                        data-chat-info-toggle="">
 
@@ -274,13 +300,9 @@ const MessageContent = ({t, user}) => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                   d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
-
-
                                         <span>View Info</span>
                                     </a>
-
                                     <a className="dropdown-item align-items-center d-flex" href="# ">
-
                                         <svg className="hw-20 mr-2" fill="none" viewBox="0 0 24 24"
                                              stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
@@ -289,8 +311,6 @@ const MessageContent = ({t, user}) => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                   d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
                                         </svg>
-
-
                                         <span>Mute Notifications</span>
                                     </a>
                                     <a className="dropdown-item align-items-center d-flex" href="# ">
@@ -300,7 +320,6 @@ const MessageContent = ({t, user}) => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                   d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                         </svg>
-
                                         <span>Wallpaper</span>
                                     </a>
                                     <a className="dropdown-item align-items-center d-flex" href="# ">
@@ -310,7 +329,6 @@ const MessageContent = ({t, user}) => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                   d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
                                         </svg>
-
                                         <span>Archive</span>
                                     </a>
                                     <a className="dropdown-item align-items-center d-flex" href="# ">
@@ -320,8 +338,6 @@ const MessageContent = ({t, user}) => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
-
-
                                         <span>Delete</span>
                                     </a>
                                     <a className="dropdown-item align-items-center d-flex text-danger" href="# ">
@@ -331,8 +347,6 @@ const MessageContent = ({t, user}) => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                   d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                                         </svg>
-
-
                                         <span>Block</span>
                                     </a>
                                 </div>
@@ -354,8 +368,6 @@ const MessageContent = ({t, user}) => {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                         </svg>
-
-
                                     </span>
                             </div>
                         </div>
@@ -369,6 +381,8 @@ const MessageContent = ({t, user}) => {
                             {loading && <div className="loadingMessage"></div>}
                             {messages.length > 0 ? messages.map((m, index) => (
                                 <div key={index} className={`message ${user.id === m.users.id ? 'self' : ''}`}>
+                                    {user.id !== m.users.id && (
+                                        <span style={{marginLeft: '30px'}}>{m.users.name}</span>)}
                                     <div className="message-wrapper">
                                         <div className="message-content">
                                             <span>{m.message}</span>
@@ -412,14 +426,12 @@ const MessageContent = ({t, user}) => {
                                                     <span>Replay</span>
                                                 </a>
                                                 <a className="dropdown-item d-flex align-items-center" href="# ">
-
                                                     <svg className="hw-18 rotate-y mr-2" fill="none" viewBox="0 0 24 24"
                                                          stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round"
                                                               strokeWidth="2"
                                                               d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
                                                     </svg>
-
                                                     <span>Forward</span>
                                                 </a>
                                                 <a className="dropdown-item d-flex align-items-center" href="# ">
@@ -430,8 +442,6 @@ const MessageContent = ({t, user}) => {
                                                               strokeWidth="2"
                                                               d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
                                                     </svg>
-
-
                                                     <span>Favourite</span>
                                                 </a>
                                                 <a className="dropdown-item d-flex align-items-center text-danger"
@@ -452,6 +462,16 @@ const MessageContent = ({t, user}) => {
                             )) : (
                                 <span className="text-primary">{t('newChat')}</span>
                             )}
+                            <div className={`message`}>
+                                <div className="message-wrapper">
+                                    <div className="message-content">
+                                        <Typing/>
+                                    </div>
+                                </div>
+                                <div className="message-options">
+                                    <div className="avatar avatar-sm"><img src='anh'/></div>
+                                </div>
+                            </div>
                             <div className="chat-finished" id="chat-finished"></div>
                         </div>
                     </div>
@@ -506,7 +526,6 @@ const MessageContent = ({t, user}) => {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                               d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                                     </svg>
-
                                     <span>Location</span>
                                 </a>
                                 <a className="dropdown-item" href="# ">
@@ -514,7 +533,6 @@ const MessageContent = ({t, user}) => {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                               d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                     </svg>
-
                                     <span>Poll</span>
                                 </a>
                             </div>
@@ -522,10 +540,13 @@ const MessageContent = ({t, user}) => {
                     </div>
                     <Editor
                         apiKey={config.TINY_MCE_KEY}
-                        initialValue={message}
+                        value={`${message}`}
+                        onKeyDown={(e) => sendMessage(e)}
+                        onFocus={typing}
+                        onBlur={clearTyping}
                         init={{
                             height: '108px',
-                            // content_style: "p {margin-left: 0px;padding-left: 40px;padding-right: 40px}",
+                            content_style: "p {margin-left: 0px;padding-left: 40px;padding-right: 40px}",
                             plugins: "emoticons",
                             toolbar: `undo redo | emoticons`,
                             toolbar_location: "bottom",
@@ -533,9 +554,9 @@ const MessageContent = ({t, user}) => {
                             statusbar: false,
                             branding: false,
                         }}
-                        onEditorChange={handleEditorChange}
+                        onEditorChange={(e) => handleEditorChange(e)}
                     />
-                    <div style={{marginRight: '10px'}}
+                    <div style={{marginRight: '10px'}} onClick={(e) => sendMessage(e)}
                          className="btn btn-primary btn-icon send-icon rounded-circle text-light mb-1" role="button">
                         <svg className="hw-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
