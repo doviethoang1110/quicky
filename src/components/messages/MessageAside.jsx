@@ -7,8 +7,9 @@ import client from "../../plugins/apollo";
 import {FIND_CONVERSATIONS} from "../../graphql/conversations/conversations.query";
 import config from "../../config";
 import socket from "../../utils/socket";
-import {GET_CONVERSATION, GET_NEW_CHAT, SEND_NEW_CONVERSATION} from "../../constants";
+import {GET_CONVERSATION, GET_NEW_CHAT, RECEIVE_MESSAGE_ASIDE, SEND_NEW_CONVERSATION} from "../../constants";
 import {debounce} from 'lodash';
+import {formatMessageDatetime} from "../../utils/helpers";
 
 const MessageAside = ({t, user}) => {
 
@@ -21,6 +22,7 @@ const MessageAside = ({t, user}) => {
     const [filter, setFilter] = useState(JSON.stringify({usersId: user.id}));
     const [loading, setLoading] = useState(false);
     const [label, setLabel] = useState(array[0]);
+    const [flag, setFlag] = useState(true);
 
     const query = async (page = currentPage, filter = `{}`) => {
         return await client.query({
@@ -45,14 +47,40 @@ const MessageAside = ({t, user}) => {
         socket.emit(GET_NEW_CHAT, data);
     };
 
+    const handleReceiveMessage = data => {
+        let i = 0;
+        const found = conversations.find((c, index) => {
+            i = index;
+            return +c.id === +data.conversationsId;
+        });
+        const cloneArray = [...conversations];
+        const clone = {...found};
+        clone.updatedAt = new Date();
+        clone.lastMessage = {
+            message: data.message,
+            users: {id: data.usersId, name: data.name}
+        }
+        for (let i = 0; i < document.getElementsByClassName("contacts-item").length; i++) {
+            document.getElementsByClassName("contacts-item")[i].classList.remove("active")
+        }
+        cloneArray[0] = clone;
+        if (found && i !== 0) cloneArray[i] = conversations[0];
+        setConversations([...cloneArray]);
+    }
+
     useEffect(() => {
         if (conversations.length > 0) {
             document.getElementById(`conversation${conversations[0].id}`).classList.add("active")
-            socket.emit(GET_CONVERSATION, conversations[0].id)
+            if(flag) {
+                socket.emit(GET_CONVERSATION, conversations[0].id);
+                setFlag(false);
+            }
         }
         socket.on(SEND_NEW_CONVERSATION, handleSocket);
+        socket.on(RECEIVE_MESSAGE_ASIDE, handleReceiveMessage);
         return () => {
             socket.off(SEND_NEW_CONVERSATION, handleSocket);
+            socket.off(RECEIVE_MESSAGE_ASIDE, handleReceiveMessage);
         }
     }, [conversations]);
 
@@ -165,10 +193,13 @@ const MessageAside = ({t, user}) => {
                                     <div className="contacts-content">
                                         <div className="contacts-info">
                                             <h6 className="chat-name text-truncate">{c.name}</h6>
-                                            <div className="chat-time">Just now</div>
+                                            <div
+                                                className="chat-time">{formatMessageDatetime(c.updatedAt, t('justNow'), t('minuteAgo'), t('yesterday'))}</div>
                                         </div>
                                         <div className="contacts-texts">
-                                            <p className="text-truncate">{c?.lastMessage?.message || ''}</p>
+                                            <p className="text-truncate">
+                                                {c?.lastMessage?.users ? (c?.lastMessage?.users?.id !== user.id ? c?.lastMessage?.users?.name : 'You: ' + (c?.lastMessage?.message || '')) : ''}
+                                            </p>
                                         </div>
                                     </div>
                                 </a>

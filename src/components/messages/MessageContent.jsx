@@ -160,11 +160,13 @@ const MessageContent = ({t, user}) => {
                     conversationsId: conversation.id,
                     message,
                     usersId: user.id,
+                    name: user.name,
                     type: conversation.type,
                 }
             } else {
                 request = {
-                    message, userId: user.id,
+                    message, usersId: user.id,
+                    name: user.name,
                     creatorId: user.id, conversationsId: conversation.id
                 }
             }

@@ -28,6 +28,7 @@ export const TYPING = "TYPING";
 export const CLEAR_TYPING = "CLEAR_TYPING";
 export const RECEIVE_CLEAR_TYPING = "RECEIVE_CLEAR_TYPING";
 export const TYPING_MESSAGE = "TYPING_MESSAGE";
+export const RECEIVE_MESSAGE_ASIDE = "RECEIVE_MESSAGE_ASIDE";
 
 // user
 export const USER_LOGIN = "USER_LOGIN";

@@ -8,6 +8,7 @@ export const FIND_CONVERSATIONS = gql`
             conversations {
                 id
                 name
+                updatedAt
                 lastMessage {
                     message
                     type
@@ -17,6 +18,10 @@ export const FIND_CONVERSATIONS = gql`
                 }
                 image
                 type
+                participants {
+                    id
+                    name
+                }
             }
         }
     }
