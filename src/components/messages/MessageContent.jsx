@@ -30,7 +30,8 @@ const MessageContent = ({t, user}) => {
         id: null,
         name: '',
         type: '',
-        image: ''
+        image: '',
+        participants: []
     });
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -64,7 +65,17 @@ const MessageContent = ({t, user}) => {
             setTotalPage(data.findMessages.totalPage);
             setLoading(false);
         }
+        setTypings([]);
     }, [currentPage, conversation]);
+
+    useEffect(() => {
+        if (conversation.participants.length > 0) {
+            socket.on(RECEIVE_MESSAGE, handleReceiveMessage);
+            return () => {
+                socket.off(RECEIVE_MESSAGE, handleReceiveMessage);
+            }
+        }
+    }, [conversation.participants.length])
 
     const scrollToBottom = () => {
         document.querySelector(".chat-finished").scrollIntoView({
@@ -88,7 +99,17 @@ const MessageContent = ({t, user}) => {
     }
 
     const handleReceiveMessage = data => {
-        console.log('vào ', data)
+        const found = conversation.participants.find(p => p.usersId === data.usersId);
+        if (found) {
+            const newMsg = {
+                type: 'text',
+                message: data.message,
+                users: {id: data.usersId, name: found.users.name},
+                image: found.users.avatar,
+                createdAt: formatMessageDatetime(new Date(), t('justNow'), t('minuteAgo'), t('yesterday'))
+            }
+            setMessages(messages => [...messages, newMsg]);
+        }
     }
 
     const handleTypingMessage = data => {
@@ -114,10 +135,8 @@ const MessageContent = ({t, user}) => {
 
     useEffect(() => {
         socket.on(GET_CONVERSATION_SUCCESS, handleSocket);
-        socket.on(RECEIVE_MESSAGE, handleReceiveMessage);
         return () => {
             socket.off(GET_CONVERSATION_SUCCESS, handleSocket);
-            socket.off(RECEIVE_MESSAGE, handleReceiveMessage);
         }
     }, []);
 
@@ -133,12 +152,21 @@ const MessageContent = ({t, user}) => {
 
     const handleMessage = (message) => {
         if (message) {
+            let request;
             message = message.replace('<p>', '');
             message = message.replace('</p>', '');
-            const request = {
-                conversationsId: conversation.id,
-                message,
-                usersId: user.id
+            if (conversation.id) {
+                request = {
+                    conversationsId: conversation.id,
+                    message,
+                    usersId: user.id,
+                    type: conversation.type,
+                }
+            } else {
+                request = {
+                    message, userId: user.id,
+                    creatorId: user.id, conversationsId: conversation.id
+                }
             }
             socket.emit(SEND_MESSAGE, request);
             setMessage("");
@@ -178,7 +206,8 @@ const MessageContent = ({t, user}) => {
         <div className="chats">
             <div className="chat-body">
                 <div className="chat-header">
-                    <button className="btn btn-secondary btn-icon btn-minimal btn-sm text-muted d-xl-none" type="button"
+                    <button className="btn btn-secondary btn-icon btn-minimal btn-sm text-muted d-xl-none"
+                            type="button"
                             data-close="">
 
                         <svg className="hw-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -201,7 +230,8 @@ const MessageContent = ({t, user}) => {
                     </div>
                     <ul className="nav flex-nowrap">
                         <li className="nav-item list-inline-item d-none d-sm-block mr-1">
-                            <a className="nav-link text-muted px-1" data-toggle="collapse" data-target="#searchCollapse"
+                            <a className="nav-link text-muted px-1" data-toggle="collapse"
+                               data-target="#searchCollapse"
                                href="# " aria-expanded="false">
 
                                 <svg className="hw-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -432,7 +462,8 @@ const MessageContent = ({t, user}) => {
                                                aria-expanded="false">
                                                 <svg className="hw-18" fill="none" viewBox="0 0 24 24"
                                                      stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                                    <path strokeLinecap="round" strokeLinejoin="round"
+                                                          strokeWidth="2"
                                                           d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
                                                 </svg>
                                             </a>
@@ -457,7 +488,8 @@ const MessageContent = ({t, user}) => {
                                                     <span>Replay</span>
                                                 </a>
                                                 <a className="dropdown-item d-flex align-items-center" href="# ">
-                                                    <svg className="hw-18 rotate-y mr-2" fill="none" viewBox="0 0 24 24"
+                                                    <svg className="hw-18 rotate-y mr-2" fill="none"
+                                                         viewBox="0 0 24 24"
                                                          stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round"
                                                               strokeWidth="2"
@@ -527,14 +559,16 @@ const MessageContent = ({t, user}) => {
                             </button>
                             <div className="dropdown-menu">
                                 <a className="dropdown-item" href="# ">
-                                    <svg className="hw-20 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg className="hw-20 mr-2" fill="none" viewBox="0 0 24 24"
+                                         stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                               d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                     </svg>
                                     <span>Gallery</span>
                                 </a>
                                 <a className="dropdown-item" href="# ">
-                                    <svg className="hw-20 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg className="hw-20 mr-2" fill="none" viewBox="0 0 24 24"
+                                         stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                               d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
                                     </svg>
@@ -542,7 +576,8 @@ const MessageContent = ({t, user}) => {
                                     <span>Audio</span>
                                 </a>
                                 <a className="dropdown-item" href="# ">
-                                    <svg className="hw-20 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg className="hw-20 mr-2" fill="none" viewBox="0 0 24 24"
+                                         stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                               d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                     </svg>
@@ -550,7 +585,8 @@ const MessageContent = ({t, user}) => {
                                     <span>Document</span>
                                 </a>
                                 <a className="dropdown-item" href="# ">
-                                    <svg className="hw-20 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg className="hw-20 mr-2" fill="none" viewBox="0 0 24 24"
+                                         stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                     </svg>
@@ -558,7 +594,8 @@ const MessageContent = ({t, user}) => {
                                     <span>Contact</span>
                                 </a>
                                 <a className="dropdown-item" href="# ">
-                                    <svg className="hw-20 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg className="hw-20 mr-2" fill="none" viewBox="0 0 24 24"
+                                         stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                               d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
@@ -567,7 +604,8 @@ const MessageContent = ({t, user}) => {
                                     <span>Location</span>
                                 </a>
                                 <a className="dropdown-item" href="# ">
-                                    <svg className="hw-20 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg className="hw-20 mr-2" fill="none" viewBox="0 0 24 24"
+                                         stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                               d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                     </svg>
@@ -595,7 +633,8 @@ const MessageContent = ({t, user}) => {
                         onEditorChange={(e) => handleEditorChange(e)}
                     />
                     <div style={{marginRight: '10px'}} onClick={(e) => sendMessage(e)}
-                         className="btn btn-primary btn-icon send-icon rounded-circle text-light mb-1" role="button">
+                         className="btn btn-primary btn-icon send-icon rounded-circle text-light mb-1"
+                         role="button">
                         <svg className="hw-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
                                   d="M14 5l7 7m0 0l-7 7m7-7H3"/>
