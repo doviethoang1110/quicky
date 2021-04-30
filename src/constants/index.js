@@ -24,6 +24,10 @@ export const NEW_CHAT = "NEW_CHAT";
 export const GET_NEW_CHAT = "GET_NEW_CHAT";
 export const SEND_MESSAGE = "SEND_MESSAGE";
 export const RECEIVE_MESSAGE = "RECEIVE_MESSAGE";
+export const TYPING = "TYPING";
+export const CLEAR_TYPING = "CLEAR_TYPING";
+export const RECEIVE_CLEAR_TYPING = "RECEIVE_CLEAR_TYPING";
+export const TYPING_MESSAGE = "TYPING_MESSAGE";
 
 // user
 export const USER_LOGIN = "USER_LOGIN";

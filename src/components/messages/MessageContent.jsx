@@ -1,6 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import socket from "../../utils/socket";
-import {GET_CONVERSATION_SUCCESS, RECEIVE_MESSAGE, SEND_MESSAGE} from "../../constants";
+import {
+    CLEAR_TYPING,
+    GET_CONVERSATION_SUCCESS, RECEIVE_CLEAR_TYPING,
+    RECEIVE_MESSAGE,
+    SEND_MESSAGE,
+    TYPING,
+    TYPING_MESSAGE
+} from "../../constants";
 import config from "../../config";
 import {formatMessageDatetime} from "../../utils/helpers";
 import {withTranslation} from "react-i18next";
@@ -30,6 +37,7 @@ const MessageContent = ({t, user}) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPage, setTotalPage] = useState(null);
     const [message, setMessage] = useState("");
+    const [typings, setTypings] = useState([]);
 
     const query = async (page = currentPage) => {
         return await client.query({
@@ -58,6 +66,13 @@ const MessageContent = ({t, user}) => {
         }
     }, [currentPage, conversation]);
 
+    const scrollToBottom = () => {
+        document.querySelector(".chat-finished").scrollIntoView({
+            block: 'end',
+            behavior: 'auto'
+        });
+    }
+
     const handleSocket = data => {
         if (data) {
             const {id, name, type, image, participants, messages} = data;
@@ -68,16 +83,34 @@ const MessageContent = ({t, user}) => {
                 })).reverse())
             } else setMessages([]);
             setConversation({id, name, type, image, participants});
-            document.querySelector(".chat-finished").scrollIntoView({
-                block: 'end',
-                behavior: 'auto'
-            });
+            scrollToBottom();
         }
     }
 
     const handleReceiveMessage = data => {
         console.log('vào ', data)
     }
+
+    const handleTypingMessage = data => {
+        if (!typings.find(t => t.name === data.name)) {
+            setTypings([...typings, data]);
+            scrollToBottom();
+        }
+    }
+
+    const handleClearTyping = data => {
+        typings.splice(typings.find(t => t.name === data.name), 1);
+        setTypings([...typings]);
+    }
+
+    useEffect(() => {
+        socket.on(TYPING_MESSAGE, handleTypingMessage);
+        socket.on(RECEIVE_CLEAR_TYPING, handleClearTyping);
+        return () => {
+            socket.off(TYPING_MESSAGE, handleTypingMessage);
+            socket.off(RECEIVE_CLEAR_TYPING, handleClearTyping);
+        }
+    }, [typings]);
 
     useEffect(() => {
         socket.on(GET_CONVERSATION_SUCCESS, handleSocket);
@@ -126,20 +159,18 @@ const MessageContent = ({t, user}) => {
         let data;
         if (conversation.type === 'group')
             data = {
-                conversationsId: conversation.id, name: user.name, image: user.avatar, type: conversation.type,
-                participants: conversation.participants
+                conversationsId: conversation.id, name: user.name, avatar: user.avatar, type: conversation.type
             }
         else data = {
-            conversationId: conversation.id, type: conversation.type,
-            participants: conversation.participants
+            conversationId: conversation.id, type: conversation.type
         }
-        socket.emit("TYPING", data);
+        socket.emit(TYPING, data);
     }
 
     const clearTyping = () => {
-        socket.emit("CLEAR_TYPING", {
-            conversationsId: conversation.id, name: user.name,
-            participants: conversation.participants
+        socket.emit(CLEAR_TYPING, {
+            conversationsId: conversation.id,
+            name: user.name
         });
     }
 
@@ -462,16 +493,23 @@ const MessageContent = ({t, user}) => {
                             )) : (
                                 <span className="text-primary">{t('newChat')}</span>
                             )}
-                            <div className={`message`}>
-                                <div className="message-wrapper">
-                                    <div className="message-content">
-                                        <Typing/>
+                            {typings.length > 0 && typings.map((m, index) => (
+                                <div key={index} className={`message`}>
+                                    {conversation.type === 'group' && (
+                                        <span style={{marginLeft: '30px'}}>{m.name}</span>)}
+                                    <div className="message-wrapper">
+                                        <div className="message-content">
+                                            <Typing/>
+                                        </div>
+                                    </div>
+                                    <div className="message-options">
+                                        <div className="avatar avatar-sm"><img src={
+                                            m.image && (m.image.startsWith("https") ? m.image : `${config.FIREBASE_TOP_LINK + "avatar%2F" + m.image + config.FIREBASE_BOTTOM_LINK}`) ||
+                                            'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
+                                        }/></div>
                                     </div>
                                 </div>
-                                <div className="message-options">
-                                    <div className="avatar avatar-sm"><img src='anh'/></div>
-                                </div>
-                            </div>
+                            ))}
                             <div className="chat-finished" id="chat-finished"></div>
                         </div>
                     </div>
