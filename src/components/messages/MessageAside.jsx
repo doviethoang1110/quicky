@@ -44,6 +44,9 @@ const MessageAside = ({t, user}) => {
         } else {
             setConversations([data, ...conversations]);
         }
+        for (let i = 0; i < document.getElementsByClassName("contacts-item").length; i++) {
+            document.getElementsByClassName("contacts-item")[i].classList.remove("active")
+        }
         socket.emit(GET_NEW_CHAT, data);
     };
 
@@ -71,7 +74,7 @@ const MessageAside = ({t, user}) => {
     useEffect(() => {
         if (conversations.length > 0) {
             document.getElementById(`conversation${conversations[0].id}`).classList.add("active")
-            if(flag) {
+            if (flag) {
                 socket.emit(GET_CONVERSATION, conversations[0].id);
                 setFlag(false);
             }
@@ -90,12 +93,9 @@ const MessageAside = ({t, user}) => {
             document.getElementsByClassName("contacts-item")[i].classList.remove("active")
         }
         const found = conversations.find(c => c.id === null);
-        if (found) {
-            setConversations([...conversations.filter((c => c.id !== null))])
-        } else {
-            document.getElementById(`conversation${id}`).classList.add("active");
-            socket.emit(GET_CONVERSATION, id);
-        }
+        if (found) setConversations([...conversations.filter((c => c.id !== null))])
+        else document.getElementById(`conversation${id}`).classList.add("active");
+        socket.emit(GET_CONVERSATION, id);
     }
 
     const delayedQuery = useCallback(debounce(async (filter, q) => {
@@ -186,19 +186,30 @@ const MessageAside = ({t, user}) => {
                                 <a className="contacts-link" href="javascript:;">
                                     <div className="avatar avatar-online">
                                         <img src={
-                                            c.image && (c.image.startsWith("https") ? c.image : `${config.FIREBASE_TOP_LINK + "group%2F" + c.image + config.FIREBASE_BOTTOM_LINK}`) ||
-                                            'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
+                                            c.type === 'single' ?
+                                                (
+                                                    c.participants.find(p => +p.id !== +user.id).avatar
+                                                        ? (c.participants.find(p => +p.id !== +user.id).avatar.startsWith("https")
+                                                        ? c.participants.find(p => +p.id !== +user.id).avatar
+                                                        : `${config.FIREBASE_TOP_LINK + "avatar%2F" + c.image + config.FIREBASE_BOTTOM_LINK}`)
+                                                        : 'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
+                                                ) :
+                                                c.image && `${config.FIREBASE_TOP_LINK + "group%2F" + c.image + config.FIREBASE_BOTTOM_LINK}`
                                         } alt=""/>
                                     </div>
                                     <div className="contacts-content">
                                         <div className="contacts-info">
-                                            <h6 className="chat-name text-truncate">{c.name}</h6>
+                                            <h6 className="chat-name text-truncate">{
+                                                c.type === 'single'
+                                                    ? c.participants.find(p => +p.id !== +user.id).name
+                                                    : c.name
+                                            }</h6>
                                             <div
                                                 className="chat-time">{formatMessageDatetime(c.updatedAt, t('justNow'), t('minuteAgo'), t('yesterday'))}</div>
                                         </div>
                                         <div className="contacts-texts">
                                             <p className="text-truncate">
-                                                {c?.lastMessage?.users ? (c?.lastMessage?.users?.id !== user.id ? c?.lastMessage?.users?.name : 'You: ' + (c?.lastMessage?.message || '')) : ''}
+                                                {c?.lastMessage?.users ? ((c?.lastMessage?.users?.id !== user.id ? `${c?.lastMessage?.users?.name + ": "}` : 'You: ') + `${(c?.lastMessage?.message || '')}`) : ''}
                                             </p>
                                         </div>
                                     </div>

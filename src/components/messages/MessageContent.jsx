@@ -99,16 +99,19 @@ const MessageContent = ({t, user}) => {
     }
 
     const handleReceiveMessage = data => {
-        const found = conversation.participants.find(p => p.usersId === data.usersId);
+        const found = data.type === 'single'
+            ? data.participants.find(p => p.usersId === data.message.usersId)
+            : conversation.participants.find(p => p.usersId === data.usersId);
         if (found) {
             const newMsg = {
                 type: 'text',
-                message: data.message,
-                users: {id: data.usersId, name: found.users.name},
+                message: data.type === 'single' ? data.message.message : data.message,
+                users: {id: found.usersId, name: found.users.name},
                 image: found.users.avatar,
                 createdAt: formatMessageDatetime(new Date(), t('justNow'), t('minuteAgo'), t('yesterday'))
             }
             setMessages(messages => [...messages, newMsg]);
+            scrollToBottom();
         }
     }
 
@@ -167,7 +170,7 @@ const MessageContent = ({t, user}) => {
                 request = {
                     message, usersId: user.id,
                     name: user.name,
-                    creatorId: user.id, conversationsId: conversation.id
+                    participants: conversation.participants, conversationsId: conversation.id
                 }
             }
             socket.emit(SEND_MESSAGE, request);
@@ -220,13 +223,30 @@ const MessageContent = ({t, user}) => {
                     <div className="media chat-name align-items-center text-truncate">
                         <div className="avatar avatar-online d-none d-sm-inline-block mr-3">
                             <img src={
-                                conversation.image && (conversation.image.startsWith("https") ? conversation.image : `${config.FIREBASE_TOP_LINK + "group%2F" + conversation.image + config.FIREBASE_BOTTOM_LINK}`) ||
-                                'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
+                                conversation.type === 'single' ?
+                                    (conversation.participants.length > 0
+                                        && conversation.participants.find(p => user.id !== p.usersId).users.avatar
+                                            ? (
+                                                conversation.participants.find(p => user.id !== p.usersId).users.avatar.startsWith("https")
+                                                    ? conversation.participants.find(p => user.id !== p.usersId).users.avatar
+                                                    : `${config.FIREBASE_TOP_LINK + "avatar%2F" +
+                                                    conversation.participants.find(p => user.id !== p.usersId).users.avatar +
+                                                    config.FIREBASE_BOTTOM_LINK}`
+                                            )
+                                            : 'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
+                                    )
+                                    :
+                                    conversation.image && `${config.FIREBASE_TOP_LINK + "group%2F" + conversation.image + config.FIREBASE_BOTTOM_LINK}`
                             } alt=""/>
                         </div>
 
                         <div className="media-body align-self-center ">
-                            <h6 className="text-truncate mb-0">{conversation.name}</h6>
+                            <h6 className="text-truncate mb-0">{
+                                conversation.type === 'single' ?
+                                    (conversation.participants.length > 0
+                                        && conversation.participants.find(p => user.id !== p.usersId).users.name)
+                                    : conversation.name
+                            }</h6>
                             <small className="text-muted">Online</small>
                         </div>
                     </div>
