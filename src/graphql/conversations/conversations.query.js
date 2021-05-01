@@ -21,6 +21,7 @@ export const FIND_CONVERSATIONS = gql`
                 participants {
                     id
                     name
+                    avatar
                 }
             }
         }

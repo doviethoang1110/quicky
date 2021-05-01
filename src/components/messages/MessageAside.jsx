@@ -37,17 +37,23 @@ const MessageAside = ({t, user}) => {
     }
 
     const handleSocket = data => {
-        const found = conversations.find(c => c.id === null);
-        if (found) {
-            conversations[conversations.indexOf(found)] = data;
-            setConversations([...conversations]);
-        } else {
-            setConversations([data, ...conversations]);
-        }
         for (let i = 0; i < document.getElementsByClassName("contacts-item").length; i++) {
             document.getElementsByClassName("contacts-item")[i].classList.remove("active")
         }
-        socket.emit(GET_NEW_CHAT, data);
+        const found = conversations.find(c => c.id === data.id);
+        if (found && found.id === null) {
+            conversations[conversations.indexOf(found)] = data;
+            setConversations([...conversations]);
+            socket.emit(GET_NEW_CHAT, data);
+        } else {
+            if (data.id) {
+                document.getElementById(`conversation${data.id}`).classList.add("active");
+                socket.emit(GET_CONVERSATION, data.id);
+            } else {
+                setConversations([data, ...conversations]);
+                socket.emit(GET_NEW_CHAT, data);
+            }
+        }
     };
 
     const handleReceiveMessage = data => {
@@ -186,22 +192,23 @@ const MessageAside = ({t, user}) => {
                                 <a className="contacts-link" href="javascript:;">
                                     <div className="avatar avatar-online">
                                         <img src={
-                                            c.type === 'single' ?
+                                            c.avatar ? `${config.FIREBASE_TOP_LINK + "avatar%2F" + c.avatar + config.FIREBASE_BOTTOM_LINK}` :
+                                            (c.type === 'single' ?
                                                 (
                                                     c.participants.find(p => +p.id !== +user.id).avatar
-                                                        ? (c.participants.find(p => +p.id !== +user.id).avatar.startsWith("https")
+                                                        ? (c.participants.find(p => +p.id !== +user.id).avatar?.startsWith("https")
                                                         ? c.participants.find(p => +p.id !== +user.id).avatar
-                                                        : `${config.FIREBASE_TOP_LINK + "avatar%2F" + c.image + config.FIREBASE_BOTTOM_LINK}`)
+                                                        : `${config.FIREBASE_TOP_LINK + "avatar%2F" + c.participants.find(p => +p.id !== +user.id).avatar + config.FIREBASE_BOTTOM_LINK}`)
                                                         : 'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
                                                 ) :
-                                                c.image && `${config.FIREBASE_TOP_LINK + "group%2F" + c.image + config.FIREBASE_BOTTOM_LINK}`
+                                                c.image && `${config.FIREBASE_TOP_LINK + "avatar%2F" + c.image + config.FIREBASE_BOTTOM_LINK}`)
                                         } alt=""/>
                                     </div>
                                     <div className="contacts-content">
                                         <div className="contacts-info">
                                             <h6 className="chat-name text-truncate">{
                                                 c.type === 'single'
-                                                    ? c.participants.find(p => +p.id !== +user.id).name
+                                                    ? (c.participants.find(p => +p.id !== +user.id).name || c.name)
                                                     : c.name
                                             }</h6>
                                             <div
@@ -209,7 +216,16 @@ const MessageAside = ({t, user}) => {
                                         </div>
                                         <div className="contacts-texts">
                                             <p className="text-truncate">
-                                                {c?.lastMessage?.users ? ((c?.lastMessage?.users?.id !== user.id ? `${c?.lastMessage?.users?.name + ": "}` : 'You: ') + `${(c?.lastMessage?.message || '')}`) : ''}
+                                                {
+                                                    c?.lastMessage?.users
+                                                        ? (
+                                                            (c?.lastMessage?.users?.name !== user.name
+                                                                    ? (c.type === 'single' ? "" : c?.lastMessage?.users?.name && `${c?.lastMessage?.users?.name + ": "}`)
+                                                                    : 'You: '
+                                                            ) + `${(c?.lastMessage?.message || '')}`
+                                                        )
+                                                        : ''
+                                                }
                                             </p>
                                         </div>
                                     </div>

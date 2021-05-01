@@ -86,28 +86,27 @@ const MessageContent = ({t, user}) => {
 
     const handleSocket = data => {
         if (data) {
-            const {id, name, type, image, participants, messages} = data;
+            const {id, name, type, avatar, image, participants, messages} = data;
             if (messages?.length > 0) {
                 setMessages(messages.map(m => ({
                     ...m,
                     createdAt: formatMessageDatetime(m.createdAt, t('justNow'), t('minuteAgo'), t('yesterday'))
                 })).reverse())
             } else setMessages([]);
-            setConversation({id, name, type, image, participants});
+            setConversation({id, name, type, image: image || avatar, participants});
             scrollToBottom();
         }
     }
 
     const handleReceiveMessage = data => {
         const found = data.type === 'single'
-            ? data.participants.find(p => p.usersId === data.message.usersId)
+            ? data.participants.find(p => p.usersId === data.usersId)
             : conversation.participants.find(p => p.usersId === data.usersId);
         if (found) {
             const newMsg = {
                 type: 'text',
-                message: data.type === 'single' ? data.message.message : data.message,
-                users: {id: found.usersId, name: found.users.name},
-                image: found.users.avatar,
+                message: data.message,
+                users: {id: found.usersId, name: found.users.name, avatar: found.users.avatar},
                 createdAt: formatMessageDatetime(new Date(), t('justNow'), t('minuteAgo'), t('yesterday'))
             }
             setMessages(messages => [...messages, newMsg]);
@@ -223,20 +222,21 @@ const MessageContent = ({t, user}) => {
                     <div className="media chat-name align-items-center text-truncate">
                         <div className="avatar avatar-online d-none d-sm-inline-block mr-3">
                             <img src={
-                                conversation.type === 'single' ?
-                                    (conversation.participants.length > 0
-                                        && conversation.participants.find(p => user.id !== p.usersId).users.avatar
-                                            ? (
-                                                conversation.participants.find(p => user.id !== p.usersId).users.avatar.startsWith("https")
-                                                    ? conversation.participants.find(p => user.id !== p.usersId).users.avatar
-                                                    : `${config.FIREBASE_TOP_LINK + "avatar%2F" +
-                                                    conversation.participants.find(p => user.id !== p.usersId).users.avatar +
-                                                    config.FIREBASE_BOTTOM_LINK}`
-                                            )
-                                            : 'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
-                                    )
-                                    :
-                                    conversation.image && `${config.FIREBASE_TOP_LINK + "group%2F" + conversation.image + config.FIREBASE_BOTTOM_LINK}`
+                                conversation.image ? `${config.FIREBASE_TOP_LINK + "avatar%2F" + conversation.image + config.FIREBASE_BOTTOM_LINK}` :
+                                    (conversation.type === 'single' ?
+                                        (conversation.participants.length > 0
+                                            && conversation.participants.find(p => user.id !== p.usersId).users?.avatar
+                                                ? (
+                                                    conversation.participants.find(p => user.id !== p.usersId).users?.avatar?.startsWith("https")
+                                                        ? conversation.participants.find(p => user.id !== p.usersId).users?.avatar
+                                                        : `${config.FIREBASE_TOP_LINK + "avatar%2F" +
+                                                        conversation.participants.find(p => user.id !== p.usersId).users?.avatar +
+                                                        config.FIREBASE_BOTTOM_LINK}`
+                                                )
+                                                : 'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
+                                        )
+                                        :
+                                        conversation.image && `${config.FIREBASE_TOP_LINK + "avatar%2F" + conversation.image + config.FIREBASE_BOTTOM_LINK}`)
                             } alt=""/>
                         </div>
 
@@ -244,7 +244,7 @@ const MessageContent = ({t, user}) => {
                             <h6 className="text-truncate mb-0">{
                                 conversation.type === 'single' ?
                                     (conversation.participants.length > 0
-                                        && conversation.participants.find(p => user.id !== p.usersId).users.name)
+                                        && (conversation.participants.find(p => user.id !== p.usersId).users?.name || conversation.name))
                                     : conversation.name
                             }</h6>
                             <small className="text-muted">Online</small>
@@ -473,7 +473,7 @@ const MessageContent = ({t, user}) => {
                                     </div>
                                     <div className="message-options">
                                         <div className="avatar avatar-sm"><img src={
-                                            m.image && (m.image.startsWith("https") ? m.image : `${config.FIREBASE_TOP_LINK + "avatar%2F" + m.image + config.FIREBASE_BOTTOM_LINK}`) ||
+                                            m.users.avatar && (m.users.avatar.startsWith("https") ? m.users.avatar : `${config.FIREBASE_TOP_LINK + "avatar%2F" + m.users.avatar + config.FIREBASE_BOTTOM_LINK}`) ||
                                             'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
                                         }/>
                                         </div>

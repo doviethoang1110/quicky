@@ -72,8 +72,10 @@ const ProfileAside = ({logout, user, t, updateUser}) => {
                                         <div style={{position: 'relative'}} className="avatar avatar-lg mb-3">
                                             <img id="avatar-preview" className="avatar-img" src={
                                                 url ||
-                                                (user.avatar && user.avatar.startsWith("https") ? user.avatar : `${config.FIREBASE_TOP_LINK + "avatar%2F" + user.avatar + config.FIREBASE_BOTTOM_LINK}`) ||
-                                                'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
+                                                (user.avatar ? (user.avatar.startsWith("https")
+                                                    ? user.avatar : `${config.FIREBASE_TOP_LINK + "avatar%2F" + user.avatar + config.FIREBASE_BOTTOM_LINK}`)
+                                                :
+                                                'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg')
                                             } alt=""/>
                                         </div>
                                         {(progress > 1) && (progress < 100) && (<progress value={progress} max="100"/>)}
