@@ -75,7 +75,7 @@ const MessageContent = ({t, user}) => {
                 socket.off(RECEIVE_MESSAGE, handleReceiveMessage);
             }
         }
-    }, [conversation.participants.length])
+    }, [conversation.participants.length, conversation])
 
     const scrollToBottom = () => {
         document.querySelector(".chat-finished").scrollIntoView({
@@ -99,9 +99,11 @@ const MessageContent = ({t, user}) => {
     }
 
     const handleReceiveMessage = data => {
-        const found = data.type === 'single'
+        const found = (data.type === 'single' && !conversation.id)
             ? data.participants.find(p => p.usersId === data.usersId)
             : conversation.participants.find(p => p.usersId === data.usersId);
+        if (!conversation.id)
+            setConversation({...conversation, id: data.conversationsId, participants: data.participants});
         if (found) {
             const newMsg = {
                 type: 'text',

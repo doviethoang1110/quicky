@@ -57,13 +57,17 @@ const MessageAside = ({t, user}) => {
     };
 
     const handleReceiveMessage = data => {
-        let i = 0;
-        const found = conversations.find((c, index) => {
-            i = index;
-            return +c.id === +data.conversationsId;
-        });
+        let clone;
+        let found = conversations.find((c, index) => c.id === null);
+        let old;
+        if (!found) {
+            old = conversations.find(c => +c.id === +data.conversationsId)
+            clone = {...old};
+        } else {
+            old = found;
+            clone = {...found, id: data.conversationsId, participants: data.participants};;
+        }
         const cloneArray = [...conversations];
-        const clone = {...found};
         clone.updatedAt = new Date();
         clone.lastMessage = {
             message: data.message,
@@ -72,9 +76,8 @@ const MessageAside = ({t, user}) => {
         for (let i = 0; i < document.getElementsByClassName("contacts-item").length; i++) {
             document.getElementsByClassName("contacts-item")[i].classList.remove("active")
         }
-        cloneArray[0] = clone;
-        if (found && i !== 0) cloneArray[i] = conversations[0];
-        setConversations([...cloneArray]);
+        cloneArray[conversations.indexOf(old)] = clone;
+        setConversations([...cloneArray.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))]);
     }
 
     useEffect(() => {
@@ -193,15 +196,15 @@ const MessageAside = ({t, user}) => {
                                     <div className="avatar avatar-online">
                                         <img src={
                                             c.avatar ? `${config.FIREBASE_TOP_LINK + "avatar%2F" + c.avatar + config.FIREBASE_BOTTOM_LINK}` :
-                                            (c.type === 'single' ?
-                                                (
-                                                    c.participants.find(p => +p.id !== +user.id).avatar
-                                                        ? (c.participants.find(p => +p.id !== +user.id).avatar?.startsWith("https")
-                                                        ? c.participants.find(p => +p.id !== +user.id).avatar
-                                                        : `${config.FIREBASE_TOP_LINK + "avatar%2F" + c.participants.find(p => +p.id !== +user.id).avatar + config.FIREBASE_BOTTOM_LINK}`)
-                                                        : 'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
-                                                ) :
-                                                c.image && `${config.FIREBASE_TOP_LINK + "avatar%2F" + c.image + config.FIREBASE_BOTTOM_LINK}`)
+                                                (c.type === 'single' ?
+                                                    (
+                                                        c.participants.find(p => +p.id !== +user.id).avatar
+                                                            ? (c.participants.find(p => +p.id !== +user.id).avatar?.startsWith("https")
+                                                            ? c.participants.find(p => +p.id !== +user.id).avatar
+                                                            : `${config.FIREBASE_TOP_LINK + "avatar%2F" + c.participants.find(p => +p.id !== +user.id).avatar + config.FIREBASE_BOTTOM_LINK}`)
+                                                            : 'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
+                                                    ) :
+                                                    c.image && `${config.FIREBASE_TOP_LINK + "avatar%2F" + c.image + config.FIREBASE_BOTTOM_LINK}`)
                                         } alt=""/>
                                     </div>
                                     <div className="contacts-content">
