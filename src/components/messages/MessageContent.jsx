@@ -109,7 +109,7 @@ const MessageContent = ({t, user}) => {
                 type: 'text',
                 message: data.message,
                 users: {id: found.usersId, name: found.users.name, avatar: found.users.avatar},
-                createdAt: formatMessageDatetime(new Date(), t('justNow'), t('minuteAgo'), t('yesterday'))
+                createdAt: formatMessageDatetime(data.createdAt, t('justNow'), t('minuteAgo'), t('yesterday'))
             }
             setMessages(messages => [...messages, newMsg]);
             scrollToBottom();
@@ -166,11 +166,12 @@ const MessageContent = ({t, user}) => {
                     usersId: user.id,
                     name: user.name,
                     type: conversation.type,
+                    createdAt: new Date()
                 }
             } else {
                 request = {
                     message, usersId: user.id,
-                    name: user.name,
+                    name: user.name, createdAt: new Date(),
                     participants: conversation.participants, conversationsId: conversation.id
                 }
             }

@@ -44,7 +44,7 @@
   "yesterday": "yesterday",
   "justNow": "Just now",
   "filter.all": "All chats",
-  "filter.friend": "Friends",
+  "filter.single": "Friends",
   "filter.group": "Group",
   "filter.unread": "Unread",
   "newChat": "Start your conversation"

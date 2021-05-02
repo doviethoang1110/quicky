@@ -7,13 +7,19 @@ import client from "../../plugins/apollo";
 import {FIND_CONVERSATIONS} from "../../graphql/conversations/conversations.query";
 import config from "../../config";
 import socket from "../../utils/socket";
-import {GET_CONVERSATION, GET_NEW_CHAT, RECEIVE_MESSAGE_ASIDE, SEND_NEW_CONVERSATION} from "../../constants";
+import {
+    GET_CONVERSATION,
+    GET_NEW_CHAT,
+    INSERT_MESSAGES,
+    RECEIVE_MESSAGE_ASIDE,
+    SEND_NEW_CONVERSATION
+} from "../../constants";
 import {debounce} from 'lodash';
 import {formatMessageDatetime} from "../../utils/helpers";
 
 const MessageAside = ({t, user}) => {
 
-    const array = ['all', 'friend', 'group', 'unread'];
+    const array = ['all', 'single', 'group', 'unread'];
 
     const [search, setSearch] = useState("");
     const [totalPage, setTotalPage] = useState(null);
@@ -23,9 +29,11 @@ const MessageAside = ({t, user}) => {
     const [loading, setLoading] = useState(false);
     const [label, setLabel] = useState(array[0]);
     const [flag, setFlag] = useState(true);
+    const [conversationsId, setConversationsId] = useState(null);
 
     const query = async (page = currentPage, filter = `{}`) => {
         return await client.query({
+            fetchPolicy: 'no-cache',
             query: FIND_CONVERSATIONS,
             variables: {
                 filter,
@@ -82,6 +90,7 @@ const MessageAside = ({t, user}) => {
 
     useEffect(() => {
         if (conversations.length > 0) {
+            setConversationsId(+conversations[0].id)
             document.getElementById(`conversation${conversations[0].id}`).classList.add("active")
             if (flag) {
                 socket.emit(GET_CONVERSATION, conversations[0].id);
@@ -98,6 +107,7 @@ const MessageAside = ({t, user}) => {
 
     const showConversation = (e, id) => {
         e.preventDefault();
+        setConversationsId(id);
         for (let i = 0; i < document.getElementsByClassName("contacts-item").length; i++) {
             document.getElementsByClassName("contacts-item")[i].classList.remove("active")
         }
@@ -147,6 +157,12 @@ const MessageAside = ({t, user}) => {
             if (currentPage + 1 <= totalPage) setCurrentPage(currentPage + 1);
         }
     }
+
+    useEffect(() => {
+        return () => {
+            if (conversationsId) socket.emit(INSERT_MESSAGES, conversationsId)
+        }
+    }, [conversationsId]);
 
     return (
         <div className="tab-pane active" id="chats-content">
