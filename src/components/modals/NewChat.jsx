@@ -72,7 +72,7 @@ const NewChat = ({hideNewChatModal, show, user, t, showLoading, hideLoading}) =>
     const createNewChat = async (e, data) => {
         await showLoading()
         const {id, name, type = 'single', avatar: image = null} = data;
-        const param = {id: null, name, type, image, creatorId: user.id, participants: [user.id.toString(), id.toString()]};
+        const param = {id: null, name, type, image, participants: [user.id.toString(), id.toString()]};
         socket.emit(NEW_CHAT, param);
         await hideNewChatModal();
         await hideLoading();

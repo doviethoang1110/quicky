@@ -134,13 +134,13 @@ const CreateGroup = ({hideCreateGroup, show, t, user}) => {
         e.preventDefault();
         const image = e.target.files[0];
         setImage(image.name);
-        const uploadTask = storage.ref(`images/media/group/${image.name}`).put(image);
+        const uploadTask = storage.ref(`images/media/avatar/${image.name}`).put(image);
         uploadTask.on("state_change", snapshot => {
             setProgress(Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100));
         }, error => {
             console.log(error)
         }, () => {
-            storage.ref("images/media/group")
+            storage.ref("images/media/avatar")
                 .child(image.name)
                 .getDownloadURL()
                 .then(async url => {

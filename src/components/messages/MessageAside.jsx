@@ -7,23 +7,33 @@ import client from "../../plugins/apollo";
 import {FIND_CONVERSATIONS} from "../../graphql/conversations/conversations.query";
 import config from "../../config";
 import socket from "../../utils/socket";
-import {GET_CONVERSATION, GET_NEW_CHAT, SEND_NEW_CONVERSATION} from "../../constants";
+import {
+    GET_CONVERSATION,
+    GET_NEW_CHAT,
+    INSERT_MESSAGES,
+    RECEIVE_MESSAGE_ASIDE,
+    SEND_NEW_CONVERSATION
+} from "../../constants";
 import {debounce} from 'lodash';
+import {formatMessageDatetime} from "../../utils/helpers";
 
-const MessageAside = ({t}) => {
+const MessageAside = ({t, user}) => {
 
-    const array = ['all', 'friend', 'group', 'unread'];
+    const array = ['all', 'single', 'group', 'unread'];
 
     const [search, setSearch] = useState("");
     const [totalPage, setTotalPage] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [conversations, setConversations] = useState([]);
-    const [filter, setFilter] = useState(JSON.stringify({}));
+    const [filter, setFilter] = useState(JSON.stringify({usersId: user.id}));
     const [loading, setLoading] = useState(false);
     const [label, setLabel] = useState(array[0]);
+    const [flag, setFlag] = useState(true);
+    const [conversationsId, setConversationsId] = useState(null);
 
     const query = async (page = currentPage, filter = `{}`) => {
         return await client.query({
+            fetchPolicy: 'no-cache',
             query: FIND_CONVERSATIONS,
             variables: {
                 filter,
@@ -35,39 +45,76 @@ const MessageAside = ({t}) => {
     }
 
     const handleSocket = data => {
-        const found = conversations.find(c => c.id === null);
-        if (found) {
+        for (let i = 0; i < document.getElementsByClassName("contacts-item").length; i++) {
+            document.getElementsByClassName("contacts-item")[i].classList.remove("active")
+        }
+        const found = conversations.find(c => c.id === data.id);
+        if (found && found.id === null) {
             conversations[conversations.indexOf(found)] = data;
             setConversations([...conversations]);
+            socket.emit(GET_NEW_CHAT, data);
         } else {
-            setConversations([data, ...conversations]);
+            if (data.id) {
+                document.getElementById(`conversation${data.id}`).classList.add("active");
+                socket.emit(GET_CONVERSATION, data.id);
+            } else {
+                setConversations([data, ...conversations]);
+                socket.emit(GET_NEW_CHAT, data);
+            }
         }
-        socket.emit(GET_NEW_CHAT, data);
     };
+
+    const handleReceiveMessage = data => {
+        let clone;
+        let found = conversations.find((c, index) => c.id === null);
+        let old;
+        if (!found) {
+            old = conversations.find(c => +c.id === +data.conversationsId)
+            clone = {...old};
+        } else {
+            old = found;
+            clone = {...found, id: data.conversationsId, participants: data.participants};;
+        }
+        const cloneArray = [...conversations];
+        clone.updatedAt = new Date();
+        clone.lastMessage = {
+            message: data.message,
+            users: {id: data.usersId, name: data.name}
+        }
+        for (let i = 0; i < document.getElementsByClassName("contacts-item").length; i++) {
+            document.getElementsByClassName("contacts-item")[i].classList.remove("active")
+        }
+        cloneArray[conversations.indexOf(old)] = clone;
+        setConversations([...cloneArray.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))]);
+    }
 
     useEffect(() => {
         if (conversations.length > 0) {
+            setConversationsId(+conversations[0].id)
             document.getElementById(`conversation${conversations[0].id}`).classList.add("active")
-            socket.emit(GET_CONVERSATION, conversations[0].id)
+            if (flag) {
+                socket.emit(GET_CONVERSATION, conversations[0].id);
+                setFlag(false);
+            }
         }
         socket.on(SEND_NEW_CONVERSATION, handleSocket);
+        socket.on(RECEIVE_MESSAGE_ASIDE, handleReceiveMessage);
         return () => {
             socket.off(SEND_NEW_CONVERSATION, handleSocket);
+            socket.off(RECEIVE_MESSAGE_ASIDE, handleReceiveMessage);
         }
     }, [conversations]);
 
     const showConversation = (e, id) => {
         e.preventDefault();
+        setConversationsId(id);
         for (let i = 0; i < document.getElementsByClassName("contacts-item").length; i++) {
             document.getElementsByClassName("contacts-item")[i].classList.remove("active")
         }
         const found = conversations.find(c => c.id === null);
-        if (found) {
-            setConversations([...conversations.filter((c => c.id !== null))])
-        } else {
-            document.getElementById(`conversation${id}`).classList.add("active");
-            socket.emit(GET_CONVERSATION, id);
-        }
+        if (found) setConversations([...conversations.filter((c => c.id !== null))])
+        else document.getElementById(`conversation${id}`).classList.add("active");
+        socket.emit(GET_CONVERSATION, id);
     }
 
     const delayedQuery = useCallback(debounce(async (filter, q) => {
@@ -110,6 +157,12 @@ const MessageAside = ({t}) => {
             if (currentPage + 1 <= totalPage) setCurrentPage(currentPage + 1);
         }
     }
+
+    useEffect(() => {
+        return () => {
+            if (conversationsId) socket.emit(INSERT_MESSAGES, conversationsId)
+        }
+    }, [conversationsId]);
 
     return (
         <div className="tab-pane active" id="chats-content">
@@ -158,17 +211,41 @@ const MessageAside = ({t}) => {
                                 <a className="contacts-link" href="javascript:;">
                                     <div className="avatar avatar-online">
                                         <img src={
-                                            c.image && (c.image.startsWith("https") ? c.image : `${config.FIREBASE_TOP_LINK + "group%2F" + c.image + config.FIREBASE_BOTTOM_LINK}`) ||
-                                            'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
+                                            c.avatar ? `${config.FIREBASE_TOP_LINK + "avatar%2F" + c.avatar + config.FIREBASE_BOTTOM_LINK}` :
+                                                (c.type === 'single' ?
+                                                    (
+                                                        c.participants.find(p => +p.id !== +user.id).avatar
+                                                            ? (c.participants.find(p => +p.id !== +user.id).avatar?.startsWith("https")
+                                                            ? c.participants.find(p => +p.id !== +user.id).avatar
+                                                            : `${config.FIREBASE_TOP_LINK + "avatar%2F" + c.participants.find(p => +p.id !== +user.id).avatar + config.FIREBASE_BOTTOM_LINK}`)
+                                                            : 'https://thumbs.dreamstime.com/b/creative-vector-illustration-default-avatar-profile-placeholder-isolated-background-art-design-grey-photo-blank-template-mo-118823351.jpg'
+                                                    ) :
+                                                    c.image && `${config.FIREBASE_TOP_LINK + "avatar%2F" + c.image + config.FIREBASE_BOTTOM_LINK}`)
                                         } alt=""/>
                                     </div>
                                     <div className="contacts-content">
                                         <div className="contacts-info">
-                                            <h6 className="chat-name text-truncate">{c.name}</h6>
-                                            <div className="chat-time">Just now</div>
+                                            <h6 className="chat-name text-truncate">{
+                                                c.type === 'single'
+                                                    ? (c.participants.find(p => +p.id !== +user.id).name || c.name)
+                                                    : c.name
+                                            }</h6>
+                                            <div
+                                                className="chat-time">{formatMessageDatetime(c.updatedAt, t('justNow'), t('minuteAgo'), t('yesterday'))}</div>
                                         </div>
                                         <div className="contacts-texts">
-                                            <p className="text-truncate">{c?.lastMessage?.message || ''}</p>
+                                            <p className="text-truncate">
+                                                {
+                                                    c?.lastMessage?.users
+                                                        ? (
+                                                            (c?.lastMessage?.users?.name !== user.name
+                                                                    ? (c.type === 'single' ? "" : c?.lastMessage?.users?.name && `${c?.lastMessage?.users?.name + ": "}`)
+                                                                    : 'You: '
+                                                            ) + `${(c?.lastMessage?.message || '')}`
+                                                        )
+                                                        : ''
+                                                }
+                                            </p>
                                         </div>
                                     </div>
                                 </a>
