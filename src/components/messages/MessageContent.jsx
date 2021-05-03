@@ -646,6 +646,8 @@ const MessageContent = ({t, user}) => {
                         onFocus={typing}
                         onBlur={clearTyping}
                         init={{
+                            language: 'vi',
+                            entity_encoding : "raw",
                             height: '108px',
                             content_style: "p {margin-left: 0px;padding-left: 40px;padding-right: 40px}",
                             plugins: "emoticons",
